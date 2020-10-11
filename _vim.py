@@ -17,6 +17,30 @@ swallow_rule = MappingRule(
 		],
 )
 
+
+"""
+========================================================================
+= General rule
+========================================================================
+"""
+general_rule = MappingRule(
+	name = "general",
+	mapping = {
+		"escape": Key("escape"),
+
+		"undo": Key("u"),
+		"redo": Key("c-r"),
+
+		"file write": Text(":w\n"),
+		"file quit":  Text(":q\n"),
+
+		"set line numbers": Text(":set nu! rnu!\n"),
+		},
+	extras = [
+		Dictation("text"),
+		],
+)
+
 """
 ========================================================================
 = Navi rule
@@ -41,7 +65,9 @@ navi_rule = MappingRule(
 		"[<n>] (tail|tails) right": Text("%(n)s") + Key("E"),
 		"[<n>] (tail|tails) left":  Text("%(n)s") + Text("gE"),
 
-		"go to <abs>":  Text("%(abs)s") + Text("gg"),
+		"top line":    Text("gg"),
+		"<abs> line":  Text("%(abs)s") + Text("gg"),
+		"bottom line": Text("G"),
 
 		"line end":   Key("dollar"),
 		"line start": Key("caret"),
@@ -72,10 +98,11 @@ edit_rule = MappingRule(
 		"[<n>] (line|lines) delete": Text("%(n)s") + Key("d") + Key("d"),
 		"[<n>] (line|lines) yank":   Text("%(n)s") + Key("y") + Key("y"),
 
-		"[<n>] (word|words) right": Text("%(n)s") + Key("w"),
-		"[<n>] (word|words) left":  Text("%(n)s") + Key("b"),
-		"[<n>] (term|terms) right": Text("%(n)s") + Key("W"),
-		"[<n>] (term|terms) left":  Text("%(n)s") + Key("B"),
+		"[<n>] (byte|bytes) delete": Text("%(n)s") + Key("d") + Key("w"),
+		"[<n>] (byte|bytes) yank":   Text("%(n)s") + Key("y") + Key("w"),
+		"[<n>] (word|words) delete": Text("%(n)s") + Key("d") + Key("W"),
+		"[<n>] (word|words) yank":   Text("%(n)s") + Key("y") + Key("W"),
+
 
 		"bracket match": Key("percent"),
 		},
@@ -128,8 +155,8 @@ insert_rule = MappingRule(
 		"camel <camel_text>": Function(insert_action) + Text("%(camel_text)s") + Key("escape"),
 		"const <const_text>": Function(insert_action) + Text("%(const_text)s") + Key("escape"),
 
-		"insert line":       Key("o")    + Function(set_mode, new_mode=NONE_MODE),
-		"insert line above": Key("cs-o") + Function(set_mode, new_mode=NONE_MODE),
+		"insert line":       Key("o")   + Function(set_mode, new_mode=NONE_MODE),
+		"insert line above": Key("s-o") + Function(set_mode, new_mode=NONE_MODE),
 		},
 	extras = [
 		Dictation("text"),
@@ -147,7 +174,9 @@ insert_rule = MappingRule(
 """
 vimGrammar = Grammar("vim")
 vimGrammar.add_rule(swallow_rule)
+vimGrammar.add_rule(general_rule)
 vimGrammar.add_rule(navi_rule)
+vimGrammar.add_rule(edit_rule)
 vimGrammar.add_rule(insert_rule)
 
 
