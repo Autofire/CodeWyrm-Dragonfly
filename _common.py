@@ -18,9 +18,8 @@ general_rule = MappingRule(
 		"tab": Key("tab"),
 		"score": Key("_"),
 
-		"lair": Key("("),
-		#"layer": Text("("),
-		"rare": Key(")"),
+		"len": Key("("),
+		"ren": Key(")"),
 		"lace": Key("{"),
 		"race": Key("}"),
 		"lack": Key("["),

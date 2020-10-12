@@ -26,10 +26,11 @@ swallow_rule = MappingRule(
 general_rule = MappingRule(
 	name = "general",
 	mapping = {
-		"escape": Key("escape"),
 
-		"undo": Key("u"),
-		"redo": Key("c-r"),
+		"file first": Text(":first\n"),
+		"file next": Text(":n\n"),
+		"file previous": Text(":N\n"),
+		"file last": Text(":last\n"),
 
 		"file write": Text(":w\n"),
 		"file quit":  Text(":q\n"),
@@ -55,8 +56,8 @@ navi_rule = MappingRule(
 		"[<n>] (care|cares) right": Text("%(n)s") + Key("l"),
 		"[<n>] (care|cares) left":  Text("%(n)s") + Key("h"),
 
-		"[<n>] (byte|bytes) right": Text("%(n)s") + Key("w"),
-		"[<n>] (byte|bytes) left":  Text("%(n)s") + Key("b"),
+		"[<n>] (term|terms) right": Text("%(n)s") + Key("w"),
+		"[<n>] (term|terms) left":  Text("%(n)s") + Key("b"),
 		"[<n>] (word|words) right": Text("%(n)s") + Key("W"),
 		"[<n>] (word|words) left":  Text("%(n)s") + Key("B"),
 
@@ -65,13 +66,16 @@ navi_rule = MappingRule(
 		"[<n>] (tail|tails) right": Text("%(n)s") + Key("E"),
 		"[<n>] (tail|tails) left":  Text("%(n)s") + Text("gE"),
 
-		"top line":    Text("gg"),
-		"<abs> line":  Text("%(abs)s") + Text("gg"),
-		"bottom line": Text("G"),
+		"line top":    Text("gg"),
+		"line <abs>":  Text("%(abs)s") + Text("gg"),
+		"line bottom": Text("G"),
 
 		"line end":   Key("dollar"),
 		"line start": Key("caret"),
-		"line zero":  Key("0"),
+		"line awake": Key("0"),
+
+		"page up":   Key("pageup"),
+		"page down": Key("pagedown"),
 
 		"bracket match": Key("percent"),
 		},
@@ -89,38 +93,10 @@ navi_rule = MappingRule(
 
 """
 ========================================================================
-= Edit rule
-========================================================================
-"""
-edit_rule = MappingRule(
-	name = "edit",
-	mapping = {
-		"[<n>] (line|lines) delete": Text("%(n)s") + Key("d") + Key("d"),
-		"[<n>] (line|lines) yank":   Text("%(n)s") + Key("y") + Key("y"),
-
-		"[<n>] (byte|bytes) delete": Text("%(n)s") + Key("d") + Key("w"),
-		"[<n>] (byte|bytes) yank":   Text("%(n)s") + Key("y") + Key("w"),
-		"[<n>] (word|words) delete": Text("%(n)s") + Key("d") + Key("W"),
-		"[<n>] (word|words) yank":   Text("%(n)s") + Key("y") + Key("W"),
-
-
-		"bracket match": Key("percent"),
-		},
-	extras = [
-		Integer("n", 1, 20),
-		Dictation("text"),
-		],
-	defaults = {
-		"n": 1,
-		}
-)
-
-"""
-========================================================================
 = Insertion rule
 ========================================================================
 """
-NONE_MODE = -1
+IMMEDIATE_MODE = -1
 APPEND_MODE = 0
 INSERT_MODE = 1
 
@@ -130,40 +106,112 @@ def set_mode(new_mode):
 	global mode
 	mode = new_mode
 
+def set_mode_immediate():
+	set_mode(IMMEDIATE_MODE)
+
 def set_default_mode(new_mode):
 	global default_mode
 	default_mode = new_mode
 	set_mode(new_mode)
 
-def insert_action():
+def start_insert():
 	global mode
 	global default_mode
 
 	if   mode == APPEND_MODE: Key("a").execute()
 	elif mode == INSERT_MODE: Key("i").execute()
 
+def end_insert():
+	global mode
+	Key("space").execute()
+
+	if(mode != IMMEDIATE_MODE): 
+		issue_escape()
+
+def issue_escape():
+	global mode
+	global default_mode
+
+	Key("escape").execute()
 	mode = default_mode
+
+def upper_first(text):
+	if(len(text) > 1):
+		return text[0].upper() + text[1:]
+	elif(len(text) == 1):
+		return text[0].upper()
+	else:
+		return text
 
 insert_rule = MappingRule(
 	name = "insert",
 	mapping = {
-		"mode insert": Function(set_default_mode, new_mode=INSERT_MODE),
-		"mode append": Function(set_default_mode, new_mode=APPEND_MODE),
+		"escape": Function(issue_escape),
 
-		"say <text>":         Function(insert_action) + Text("%(text)s")       + Key("escape"),
-		"snake <snake_text>": Function(insert_action) + Text("%(snake_text)s") + Key("escape"),
-		"camel <camel_text>": Function(insert_action) + Text("%(camel_text)s") + Key("escape"),
-		"const <const_text>": Function(insert_action) + Text("%(const_text)s") + Key("escape"),
+		"mode insert":  Key("i") + Function(set_mode_immediate),
+		"mode append":  Key("a") + Function(set_mode_immediate),
+		"mode replace": Key("R") + Function(set_mode_immediate),
 
-		"insert line":       Key("o")   + Function(set_mode, new_mode=NONE_MODE),
-		"insert line above": Key("s-o") + Function(set_mode, new_mode=NONE_MODE),
+		"default insert": Function(set_default_mode, new_mode=INSERT_MODE),
+		"default append": Function(set_default_mode, new_mode=APPEND_MODE),
+
+		"say <text>":           Function(start_insert) + Text("%(text)s")        + Function(end_insert),
+		"snake <snake_text>":   Function(start_insert) + Text("%(snake_text)s")  + Function(end_insert),
+		"camel <camel_text>":   Function(start_insert) + Text("%(camel_text)s")  + Function(end_insert),
+		"const <const_text>":   Function(start_insert) + Text("%(const_text)s")  + Function(end_insert),
+		"pascal <pascal_text>": Function(start_insert) + Text("%(pascal_text)s") + Function(end_insert),
+
+		"line [below] insert": Key("o")   + Function(set_mode_immediate),
+		"line above insert":   Key("s-o") + Function(set_mode_immediate),
 		},
 	extras = [
 		Dictation("text"),
 		Dictation("snake_text").lower().replace(" ", "_"),
 		Dictation("const_text").upper().replace(" ", "_"),
-		Dictation("camel_text").camel()
+		Dictation("camel_text").camel(),
+		Dictation("pascal_text").camel().apply(upper_first)
 		],
+)
+
+"""
+========================================================================
+= Edit rule
+========================================================================
+"""
+edit_rule = MappingRule(
+	name = "edit",
+	mapping = {
+		"[<n>] undo": Text("%(n)s") + Key("u"),
+		"[<n>] redo": Text("%(n)s") + Key("c-r"),
+
+		"line end delete": Key("s-d"),
+
+		"[<n>] (term|terms) delete": Text("%(n)s") + Key("d") + Key("w"),
+		"[<n>] (term|terms) yank":   Text("%(n)s") + Key("y") + Key("w"),
+		"[<n>] (term|terms) change": Text("%(n)s") + Key("c") + Key("w") + Function(set_mode_immediate),
+
+		"[<n>] (word|words) delete": Text("%(n)s") + Key("d") + Key("W"),
+		"[<n>] (word|words) yank":   Text("%(n)s") + Key("y") + Key("W"),
+		"[<n>] (word|words) change": Text("%(n)s") + Key("c") + Key("W") + Function(set_mode_immediate),
+
+		"[<n>] (line|lines) delete": Text("%(n)s") + Key("d") + Key("d"),
+		"[<n>] (line|lines) yank":   Text("%(n)s") + Key("y") + Key("y"),
+		"[<n>] (line|lines) change": Text("%(n)s") + Key("c") + Key("c") + Function(set_mode_immediate),
+
+		"[<n>] paste (before|above)": Text("%(n)s") + Key("P"),
+		"[<n>] paste (after|below)":  Text("%(n)s") + Key("p"),
+		
+		"bracket match": Key("percent"),
+
+		"repeat": Key("."),
+		},
+	extras = [
+		Integer("n", 1, 20),
+		Dictation("text"),
+		],
+	defaults = {
+		"n": 1,
+		}
 )
 
 
