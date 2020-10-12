@@ -164,14 +164,21 @@ insert_rule = MappingRule(
 
 		"line [down] insert": Key("o")   + Function(set_mode_immediate),
 		"line up insert":     Key("s-o") + Function(set_mode_immediate),
+
+		"[<n>] backs":  Key("backspace") * Repeat(extra="n"),
 		},
 	extras = [
 		Dictation("text"),
 		Dictation("snake_text").lower().replace(" ", "_"),
 		Dictation("const_text").upper().replace(" ", "_"),
 		Dictation("camel_text").camel(),
-		Dictation("pascal_text").camel().apply(upper_first)
+		Dictation("pascal_text").camel().apply(upper_first),
+
+		Integer("n", 1, 20),
 		],
+	defaults = {
+		"n": 1,
+		}
 )
 
 """
