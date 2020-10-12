@@ -1,5 +1,5 @@
 from dragonfly import (Grammar, AppContext, MappingRule, CompoundRule,
-                       Dictation, IntegerRef, Integer,
+                       Dictation, IntegerRef, Integer, Repeat,
                        Key, Text, Function)
 
 """
@@ -50,11 +50,12 @@ general_rule = MappingRule(
 navi_rule = MappingRule(
 	name = "navi",
 	mapping = {
-		"[<n>] (line|lines) up":    Text("%(n)s") + Key("k"),
-		"[<n>] (line|lines) down":  Text("%(n)s") + Key("j"),
+		"[<n>] (line|lines) up":    Key("up")    * Repeat(extra="n"),
+		"[<n>] (line|lines) down":  Key("down")  * Repeat(extra="n"),
 
-		"[<n>] (care|cares) right": Text("%(n)s") + Key("l"),
-		"[<n>] (care|cares) left":  Text("%(n)s") + Key("h"),
+		"[<n>] (care|cares) right": Key("right") * Repeat(extra="n"),
+		"[<n>] (care|cares) left":  Key("left")  * Repeat(extra="n"),
+
 
 		"[<n>] (term|terms) right": Text("%(n)s") + Key("w"),
 		"[<n>] (term|terms) left":  Text("%(n)s") + Key("b"),
@@ -161,8 +162,8 @@ insert_rule = MappingRule(
 		"const <const_text>":   Function(start_insert) + Text("%(const_text)s")  + Function(end_insert),
 		"pascal <pascal_text>": Function(start_insert) + Text("%(pascal_text)s") + Function(end_insert),
 
-		"line [below] insert": Key("o")   + Function(set_mode_immediate),
-		"line above insert":   Key("s-o") + Function(set_mode_immediate),
+		"line [down] insert": Key("o")   + Function(set_mode_immediate),
+		"line up insert":     Key("s-o") + Function(set_mode_immediate),
 		},
 	extras = [
 		Dictation("text"),
