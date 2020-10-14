@@ -11,21 +11,6 @@ general_rule = MappingRule(
 		"left": Key("left"),
 		"right": Key("right"),
 
-		"star": Key("*"),
-		"dash": Key("-"),
-		"minus": Key("-"),
-		"space": Key("space"),
-		"tab": Key("tab"),
-		"score": Key("_"),
-
-		"len": Key("("),
-		"ren": Key(")"),
-		"lace": Key("{"),
-		"race": Key("}"),
-		"lack": Key("["),
-		"rack": Key("]"),
-        'langle': Key('langle'),
-        'rangle': Key('rangle'),
 
 		#"say <text>": Text("%(text)s"),
 		},

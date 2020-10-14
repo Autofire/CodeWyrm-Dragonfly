@@ -75,8 +75,8 @@ navi_rule = MappingRule(
 		"line start": Key("caret"),
 		"line awake": Key("0"),
 
-		"page up":   Key("pageup"),
-		"page down": Key("pagedown"),
+		"page up":   Key("pgup"),
+		"page down": Key("pgdown"),
 
 		"bracket match": Key("percent"),
 		},
@@ -115,6 +115,11 @@ def set_default_mode(new_mode):
 	default_mode = new_mode
 	set_mode(new_mode)
 
+def insert(action, space=True):
+	start_insert()
+	action.execute()
+	end_insert(space)
+
 def start_insert():
 	global mode
 	global default_mode
@@ -122,11 +127,12 @@ def start_insert():
 	if   mode == APPEND_MODE: Key("a").execute()
 	elif mode == INSERT_MODE: Key("i").execute()
 
-def end_insert():
+def end_insert(space=True):
 	global mode
-	Key("space").execute()
 
 	if(mode != IMMEDIATE_MODE): 
+		if(space): 
+			Key("space").execute()
 		issue_escape()
 
 def issue_escape():
@@ -161,9 +167,31 @@ insert_rule = MappingRule(
 		"camel <camel_text>":   Function(start_insert) + Text("%(camel_text)s")  + Function(end_insert),
 		"const <const_text>":   Function(start_insert) + Text("%(const_text)s")  + Function(end_insert),
 		"pascal <pascal_text>": Function(start_insert) + Text("%(pascal_text)s") + Function(end_insert),
+		"num <posVal>":         Function(start_insert) + Text("%(posVal)s")      + Function(end_insert),
 
-		"line [down] insert": Key("o")   + Function(set_mode_immediate),
-		"line up insert":     Key("s-o") + Function(set_mode_immediate),
+		"(minus|dash)":   Function(insert, action=Key("minus")),
+		"plus":           Function(insert, action=Key("plus")),
+		"(slash|divide)": Function(insert, action=Key("slash")),
+		"(star|times)":   Function(insert, action=Key("star")),
+
+		"space":     Function(insert, action=Key("space")),
+		"backslash": Function(insert, action=Key("backslash")),
+		"tab":       Function(insert, action=Key("tab")),
+		"score":     Function(insert, action=Key("underscore")),
+
+		"len":       Function(insert, action=Key("(")),
+		"ren":       Function(insert, action=Key(")")),
+		"lace":      Function(insert, action=Key("{")),
+		"race":      Function(insert, action=Key("}")),
+		"lack":      Function(insert, action=Key("[")),
+		"rack":      Function(insert, action=Key("]")),
+        "langle":    Function(insert, action=Key('langle')),
+        "rangle":    Function(insert, action=Key('rangle')),
+
+		
+        "line break":        Function(insert, action=Key("enter"), space=False),
+		"line insert below": Key("o")   + Function(set_mode_immediate),
+		"line insert above": Key("s-o") + Function(set_mode_immediate),
 
 		"[<n>] backs":  Key("backspace") * Repeat(extra="n"),
 		},
@@ -175,6 +203,7 @@ insert_rule = MappingRule(
 		Dictation("pascal_text").camel().apply(upper_first),
 
 		Integer("n", 1, 20),
+		Integer("posVal", 0, 1000),
 		],
 	defaults = {
 		"n": 1,
@@ -205,6 +234,7 @@ edit_rule = MappingRule(
 		"[<n>] (line|lines) delete": Text("%(n)s") + Key("d") + Key("d"),
 		"[<n>] (line|lines) yank":   Text("%(n)s") + Key("y") + Key("y"),
 		"[<n>] (line|lines) change": Text("%(n)s") + Key("c") + Key("c") + Function(set_mode_immediate),
+		"[<n>] (line|lines) join":   Text("%(n)s") + Key("s-j"),
 
 		"[<n>] paste (before|above)": Text("%(n)s") + Key("P"),
 		"[<n>] paste (after|below)":  Text("%(n)s") + Key("p"),
