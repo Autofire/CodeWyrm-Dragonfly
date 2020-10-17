@@ -1,4 +1,5 @@
-from dragonfly import (Grammar, AppContext, MappingRule, CompoundRule,
+from dragonfly import (Grammar, AppContext,
+                       MappingRule, CompoundRule, BasicRule,
                        Dictation, IntegerRef, Integer, Repeat,
                        Key, Text, Function)
 

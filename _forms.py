@@ -1,11 +1,25 @@
-from dragonfly import (Grammar, CompoundRule, AppContext)
+from dragonfly import (Grammar, CompoundRule, AppContext, FuncContext,
+                       MappingRule, Function)
 
 #from forms import *
 
 import forms.vim
 import forms.bash
 
+import logging
+logging.basicConfig()
+
 grammars = []
+
+_bash_vim = False
+def bash_vim(value=None):
+	global _bash_vim
+
+	if value is not None:
+		print("Overriding Bash with VIM: ", value)
+		_bash_vim = value
+
+	return _bash_vim
 
 def load_forms():
 	reload(forms.vim)
@@ -19,9 +33,11 @@ def config_forms():
 	putty_context = AppContext(title="bash")
 	extraterm_context = AppContext(executable="extraterm")
 
-	bash_context = putty_context | extraterm_context;
+	bash_base_context = putty_context | extraterm_context;
+	vim_bash_override_context = FuncContext(bash_vim)
 
-	vim_context = extraterm_context
+	bash_context = (bash_base_context & ~vim_bash_override_context)
+	vim_context  = (bash_base_context & vim_bash_override_context)
 
 	#bash_grammar = forms.bash.build_grammar(bash_context)
 	#bash_grammar.load()
@@ -45,7 +61,6 @@ def unload_forms():
 class FormReloader(CompoundRule):
 	spec = "dragon refresh"
 
-
 	def _process_recognition(self, node, extras): 
 		print("Reloading...")
 		unload_forms()
@@ -53,9 +68,20 @@ class FormReloader(CompoundRule):
 		print("Done.")
 		print("")
 
+shift_rule = MappingRule(
+	name = "shift",
+	mapping = {
+		"dragon shift vim":  Function(bash_vim, value=True),
+		"dragon revert vim": Function(bash_vim, value=False),
+	},
+	extras = [
+	],
+)
+
 
 formGrammar = Grammar("form handler")                
 formGrammar.add_rule(FormReloader())
+formGrammar.add_rule(shift_rule)
 formGrammar.load()
 
 print("Doing first config...")
