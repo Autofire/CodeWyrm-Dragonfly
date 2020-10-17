@@ -1,6 +1,7 @@
 from dragonfly import (Grammar, AppContext, MappingRule, Dictation, IntegerRef,
                        Key, Text)
 
+print("Loading grammar: bash")
 
 git_context = AppContext(title="git Bash")
 git_context2 = AppContext(title="MINGW32:")
@@ -15,12 +16,14 @@ grammar = Grammar(
 		| git_context2 
 		| extraterm_context))
 
-
 file_extensions_rule = MappingRule(
 	name = "file extensions",
 	mapping = {
 		"dot text": Text(".txt"),
 		"dot pie": Text(".py"),
+		"dot rust": Text(".rs"),
+		"dot C. P. P.": Text(".cpp"),
+		"dot C.": Text(".c"),
 		},
 	extras = [
 		],

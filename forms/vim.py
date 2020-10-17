@@ -2,6 +2,8 @@ from dragonfly import (Grammar, AppContext, MappingRule, CompoundRule,
                        Dictation, IntegerRef, Integer, Repeat,
                        Key, Text, Function)
 
+print("Loading grammar: vim")
+
 """
 ========================================================================
 = Swallow rule
@@ -258,12 +260,12 @@ edit_rule = MappingRule(
 = Main grammar
 ========================================================================
 """
-vimGrammar = Grammar("vim")
-vimGrammar.add_rule(swallow_rule)
-vimGrammar.add_rule(general_rule)
-vimGrammar.add_rule(navi_rule)
-vimGrammar.add_rule(edit_rule)
-vimGrammar.add_rule(insert_rule)
+grammar = Grammar("vim")
+grammar.add_rule(swallow_rule)
+grammar.add_rule(general_rule)
+grammar.add_rule(navi_rule)
+grammar.add_rule(edit_rule)
+grammar.add_rule(insert_rule)
 
 
 """
@@ -272,39 +274,47 @@ vimGrammar.add_rule(insert_rule)
 ========================================================================
 """
 """ see https://stackoverflow.com/questions/58111733/modal-commands-with-dragonfly """
+
+"""
 class VimEnabler(CompoundRule):
     spec = "dragon shift vim"
 
     def _process_recognition(self, node, extras): 
         vimBootstrap.disable()
-        vimGrammar.enable()
+        grammar.enable()
         print "VIM grammar enabled"
 
 class VimDisabler(CompoundRule):
     spec = "dragon revert vim"
 
     def _process_recognition(self, node, extras):
-        vimGrammar.disable()
+        grammar.disable()
         vimBootstrap.enable()
         print "VIM grammar disabled"
 
 vimBootstrap = Grammar("vim bootstrap")                
 vimBootstrap.add_rule(VimEnabler())
-vimGrammar.add_rule(VimDisabler())
+grammar.add_rule(VimDisabler())
 
 
-vimGrammar.load()
+grammar.load()
 vimBootstrap.load()
 
-#vimGrammar.disable()
+#grammar.disable()
 vimBootstrap.disable()
+"""
+
+#grammar.load()
 
 # Unload function which will be called by natlink at unload time.
 def unload():
-    global vimGrammar
-    if vimGrammar: vimGrammar.unload()
-    vimGrammar = None
+    global grammar
+    if grammar: grammar.unload()
+    grammar = None
 
-    global vimBootstrap
-    if vimBootstrap: vimBootstrap.unload()
-    vimBootstrap = None
+
+"""
+global vimBootstrap
+if vimBootstrap: vimBootstrap.unload()
+vimBootstrap = None
+"""
