@@ -260,12 +260,14 @@ edit_rule = MappingRule(
 = Main grammar
 ========================================================================
 """
-grammar = Grammar("vim")
-grammar.add_rule(swallow_rule)
-grammar.add_rule(general_rule)
-grammar.add_rule(navi_rule)
-grammar.add_rule(edit_rule)
-grammar.add_rule(insert_rule)
+def build_grammar(context):
+	grammar = Grammar("vim", context=(context))
+	grammar.add_rule(swallow_rule)
+	grammar.add_rule(general_rule)
+	grammar.add_rule(navi_rule)
+	grammar.add_rule(edit_rule)
+	grammar.add_rule(insert_rule)
+	return grammar
 
 
 """
@@ -307,13 +309,13 @@ vimBootstrap.disable()
 #grammar.load()
 
 # Unload function which will be called by natlink at unload time.
+"""
 def unload():
     global grammar
     if grammar: grammar.unload()
     grammar = None
 
 
-"""
 global vimBootstrap
 if vimBootstrap: vimBootstrap.unload()
 vimBootstrap = None

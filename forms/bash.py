@@ -3,6 +3,7 @@ from dragonfly import (Grammar, AppContext, MappingRule, Dictation, IntegerRef,
 
 print("Loading grammar: bash")
 
+"""
 git_context = AppContext(title="git Bash")
 git_context2 = AppContext(title="MINGW32:")
 # set the window title to bash in putty for this context to work
@@ -15,6 +16,7 @@ grammar = Grammar(
 		| git_context 
 		| git_context2 
 		| extraterm_context))
+"""
 
 file_extensions_rule = MappingRule(
 	name = "file extensions",
@@ -210,16 +212,20 @@ screen_rule = MappingRule(
 		]
 )
 
-
-grammar.add_rule(file_extensions_rule)
-grammar.add_rule(bash_rule)
-#grammar.add_rule(screen_rule)
-grammar.add_rule(git_rule)
-grammar.load()
+def build_grammar(context):
+	grammar = Grammar("bash", context=(context))
+	grammar.add_rule(file_extensions_rule)
+	grammar.add_rule(bash_rule)
+	#grammar.add_rule(screen_rule)
+	grammar.add_rule(git_rule)
+	#grammar.load()
+	return grammar
 
 # Unload function which will be called by natlink at unload time.
+"""
 def unload():
     global grammar
     if grammar: grammar.unload()
     grammar = None
+"""
 
