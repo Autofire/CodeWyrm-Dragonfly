@@ -1,5 +1,5 @@
 from dragonfly import (Grammar, AppContext,
-                       MappingRule, CompoundRule, BasicRule,
+                       MappingRule, CompoundRule,
                        Dictation, IntegerRef, Integer, Repeat,
                        Key, Text, Function)
 
@@ -35,10 +35,37 @@ general_rule = MappingRule(
 		"file previous": Text(":N\n"),
 		"file last": Text(":last\n"),
 
+		"all (file|files) write": Text(":wa\n"),
 		"file write": Text(":w\n"),
+		"file force write": Text(":w!"),
+
 		"file quit":  Text(":q\n"),
+		"file force quit":  Text(":q!"),
 
 		"set line numbers": Text(":set nu! rnu!\n"),
+
+		},
+	extras = [
+		Dictation("text"),
+		],
+)
+
+"""
+========================================================================
+= Window rule
+========================================================================
+"""
+window_rule = MappingRule(
+	name = "window",
+	mapping = {
+		"window row split": Key("c-w") + Key("s"),
+		"window column split": Key("c-w") + Key("v"),
+
+		"window up": Key("c-w") + Key("up"),
+		"window down": Key("c-w") + Key("down"),
+		"window left": Key("c-w") + Key("left"),
+		"window right": Key("c-w") + Key("right"),
+				
 		},
 	extras = [
 		Dictation("text"),
@@ -78,8 +105,8 @@ navi_rule = MappingRule(
 		"line start": Key("caret"),
 		"line awake": Key("0"),
 
-		"page up":   Key("pgup"),
-		"page down": Key("pgdown"),
+		"[<n>] (page|pages) up":   Text("%(n)s") + Key("pgup"),
+		"[<n>] (page|pages) down": Text("%(n)s") + Key("pgdown"),
 
 		"bracket match": Key("percent"),
 		},
@@ -165,12 +192,27 @@ insert_rule = MappingRule(
 		"default insert": Function(set_default_mode, new_mode=INSERT_MODE),
 		"default append": Function(set_default_mode, new_mode=APPEND_MODE),
 
-		"say <text>":           Function(start_insert) + Text("%(text)s")        + Function(end_insert),
-		"snake <snake_text>":   Function(start_insert) + Text("%(snake_text)s")  + Function(end_insert),
-		"camel <camel_text>":   Function(start_insert) + Text("%(camel_text)s")  + Function(end_insert),
-		"const <const_text>":   Function(start_insert) + Text("%(const_text)s")  + Function(end_insert),
-		"pascal <pascal_text>": Function(start_insert) + Text("%(pascal_text)s") + Function(end_insert),
-		"num <posVal>":         Function(start_insert) + Text("%(posVal)s")      + Function(end_insert),
+		"say <text>":           Function(start_insert)
+		                         + Text("%(text)s")
+								 + Function(end_insert),
+		"snake <snake_text>":   Function(start_insert)
+		                         + Text("%(snake_text)s")
+								 + Function(end_insert),
+		"camel <camel_text>":   Function(start_insert)
+		                         + Text("%(camel_text)s")
+								 + Function(end_insert),
+		"const <const_text>":   Function(start_insert)
+		                         + Text("%(const_text)s")
+								 + Function(end_insert),
+		"pascal <pascal_text>": Function(start_insert)
+		                         + Text("%(pascal_text)s")
+								 + Function(end_insert),
+		"num <posVal>":         Function(start_insert)
+		                         + Text("%(posVal)s")
+								 + Function(end_insert),
+
+
+		"[<n>] slap": Key("enter") * Repeat(extra="n"),
 
 		"(minus|dash)":   Function(insert, action=Key("minus")),
 		"plus":           Function(insert, action=Key("plus")),
@@ -182,6 +224,10 @@ insert_rule = MappingRule(
 		"tab":       Function(insert, action=Key("tab")),
 		"score":     Function(insert, action=Key("underscore")),
 
+		"colon":     Function(insert, action=Key("colon")),
+		"semi":      Function(insert, action=Key("semicolon")),
+
+
 		"len":       Function(insert, action=Key("(")),
 		"ren":       Function(insert, action=Key(")")),
 		"lace":      Function(insert, action=Key("{")),
@@ -191,8 +237,17 @@ insert_rule = MappingRule(
         "langle":    Function(insert, action=Key('langle')),
         "rangle":    Function(insert, action=Key('rangle')),
 
+        "single":    Function(insert, action=Key('squote')),
+        "double":    Function(insert, action=Key('dquote')),
+
+		"singles":   Function(start_insert) + Function(set_mode_immediate)
+		              + Text("''") + Key("left"),
+		"doubles":   Function(start_insert) + Function(set_mode_immediate)
+		              + Text('""') + Key("left"),
+
 		
-        "line break":        Function(insert, action=Key("enter"), space=False),
+        "[<n>] (line|lines) break":  Function(insert, action=Key("enter"), space=False)
+		                              * Repeat(extra="n"),
 		"line insert below": Key("o")   + Function(set_mode_immediate),
 		"line insert above": Key("s-o") + Function(set_mode_immediate),
 
@@ -268,6 +323,7 @@ def build_grammar(context):
 	grammar.add_rule(navi_rule)
 	grammar.add_rule(edit_rule)
 	grammar.add_rule(insert_rule)
+	grammar.add_rule(window_rule)
 	return grammar
 
 
