@@ -1,3 +1,4 @@
+from sys import stdout
 from dragonfly import (Grammar, CompoundRule, AppContext, FuncContext,
                        MappingRule, Function, PlaySound)
 
@@ -50,10 +51,12 @@ def bash_vim(value=None):
 	return _bash_vim
 
 def load_forms():
+	print("Loading forms...")
 	reload(forms.vim)
 	reload(forms.bash)
 	reload(forms.rust)
 	config_forms()
+	print("Done.\n")
 
 def config_forms():
 	global grammars
@@ -75,17 +78,20 @@ def config_forms():
 
 	grammars = [
 		forms.bash.build_grammar(bash_context),
-		forms.vim.build_grammar(vim_context)
+		forms.vim.build_grammar(vim_context),
+		forms.rust.build_grammar(vim_context),
 	]
 
 	for grammar in grammars:
 		grammar.load()
 
 def unload_forms():
+	stdout.write("Unloading forms...")
 	global grammars
 	for grammar in grammars:
 		grammar.unload()
 	grammars = []
+	print("done")
 
 
 """
@@ -97,18 +103,13 @@ class FormReloader(CompoundRule):
 	spec = "dragon refresh"
 
 	def _process_recognition(self, node, extras): 
-		print("Reloading...")
 		try:
 			unload_forms()
 			load_forms()
-			print("Done.")
-			print("")
 			play_sound("refresh")
 		except:
 			play_sound("error")
 			raise
-		#except Exception as e:
-			#raise e
 
 shift_rule = MappingRule(
 	name = "shift",
@@ -127,10 +128,7 @@ formGrammar.load()
 
 
 
-print("Doing first config...")
-config_forms()
-print("Done.")
-print("")
+load_forms()
 play_sound("refresh")
 
 # Unload function which will be called by natlink at unload time.
@@ -139,5 +137,6 @@ def unload():
 	if formGrammar: formGrammar.unload()
 	formGrammar = None
 	unload_forms()
+
 
 

@@ -1,6 +1,8 @@
 from dragonfly import (Grammar, AppContext,
                        MappingRule, CompoundRule,
-                       Dictation, IntegerRef, Integer, Repeat,
+                       Dictation, Integer, Repeat,
+					   IntegerRef, RuleRef,
+					   Literal, Sequence, Repetition,
                        Key, Text, Function)
 
 print("Loading grammar: vim")
@@ -111,7 +113,7 @@ navi_rule = MappingRule(
 		"bracket match": Key("percent"),
 		},
 	extras = [
-		Integer("n", 1, 20),
+		Integer("n", 1, 200),
 		Integer("abs", 1, 20000),
 		Dictation("text"),
 		],
@@ -149,6 +151,12 @@ def insert(action, space=True):
 	start_insert()
 	action.execute()
 	end_insert(space)
+
+def wrapped_insert(start, end):
+	start_insert()
+	set_mode_immediate()
+	Text(start + end).execute()
+	Key("left:" + str(len(end))).execute()
 
 def start_insert():
 	global mode
@@ -207,6 +215,12 @@ insert_rule = MappingRule(
 		"pascal <pascal_text>": Function(start_insert)
 		                         + Text("%(pascal_text)s")
 								 + Function(end_insert),
+		"lower <lower_text>": Function(start_insert)
+		                         + Text("%(lower_text)s")
+								 + Function(end_insert),
+		"upper <upper_text>": Function(start_insert)
+		                         + Text("%(upper_text)s")
+								 + Function(end_insert),
 		"num <posVal>":         Function(start_insert)
 		                         + Text("%(posVal)s")
 								 + Function(end_insert),
@@ -226,6 +240,11 @@ insert_rule = MappingRule(
 
 		"colon":     Function(insert, action=Key("colon")),
 		"semi":      Function(insert, action=Key("semicolon")),
+        "com":       Function(insert, action=Key('comma')),
+        "equals":    Function(insert, action=Key('=')),
+        "bang":      Function(insert, action=Key('!')),
+        "dot":       Function(insert, action=Key('.')),
+        "amp":       Function(insert, action=Key('&')),
 
 
 		"len":       Function(insert, action=Key("(")),
@@ -240,10 +259,8 @@ insert_rule = MappingRule(
         "single":    Function(insert, action=Key('squote')),
         "double":    Function(insert, action=Key('dquote')),
 
-		"singles":   Function(start_insert) + Function(set_mode_immediate)
-		              + Text("''") + Key("left"),
-		"doubles":   Function(start_insert) + Function(set_mode_immediate)
-		              + Text('""') + Key("left"),
+		"singles": Function(wrapped_insert, start = "'", end = "'"),
+		"doubles": Function(wrapped_insert, start = '"', end = '"'),
 
 		
         "[<n>] (line|lines) break":  Function(insert, action=Key("enter"), space=False)
@@ -259,6 +276,9 @@ insert_rule = MappingRule(
 		Dictation("const_text").upper().replace(" ", "_"),
 		Dictation("camel_text").camel(),
 		Dictation("pascal_text").camel().apply(upper_first),
+		Dictation("const_text").upper().replace(" ", "_"),
+		Dictation("lower_text").lower(),
+		Dictation("upper_text").upper(),
 
 		Integer("n", 1, 20),
 		Integer("posVal", 0, 1000),
@@ -266,6 +286,107 @@ insert_rule = MappingRule(
 	defaults = {
 		"n": 1,
 		}
+)
+
+
+"""
+========================================================================
+= Spell rule
+========================================================================
+"""
+# Credit for most of this logic goes to Christo Butcher and David Gessner
+# TODO Get URL
+class LetterRule(MappingRule):
+    name = "letter"
+    export = True
+    mapping = {
+        'alpha': Key('a', static=True),
+        'bravo': Key('b', static=True),
+        'charlie': Key('c', static=True),
+        'delta': Key('d', static=True),
+        'echo': Key('e', static=True),
+        'foxtrot': Key('f', static=True),
+        'golf': Key('g', static=True),
+        'hotel': Key('h', static=True),
+        'india': Key('i', static=True),
+        'juliet': Key('j', static=True),
+        'kilo': Key('k', static=True),
+        'lima': Key('l', static=True),
+        'mike': Key('m', static=True),
+        'november': Key('n', static=True),
+        'oscar': Key('o', static=True),
+        'papa': Key('p', static=True),
+        'queen': Key('q', static=True),
+        'romeo': Key('r', static=True),
+        'sierra': Key('s', static=True),
+        'tango': Key('t', static=True),
+        'uniform': Key('u', static=True),
+        'victor': Key('v', static=True),
+        'whiskey': Key('w', static=True),
+        'x-ray': Key('x', static=True),
+        'yankee': Key('y', static=True),
+        'zulu': Key('z', static=True),
+
+        'upper alpha': Key('A', static=True),
+        'upper bravo': Key('B', static=True),
+        'upper charlie': Key('C', static=True),
+        'upper delta': Key('D', static=True),
+        'upper echo': Key('E', static=True),
+        'upper foxtrot': Key('F', static=True),
+        'upper golf': Key('G', static=True),
+        'upper hotel': Key('H', static=True),
+        'upper india': Key('I', static=True),
+        'upper juliet': Key('J', static=True),
+        'upper kilo': Key('K', static=True),
+        'upper lima': Key('L', static=True),
+        'upper mike': Key('M', static=True),
+        'upper november': Key('N', static=True),
+        'upper oscar': Key('O', static=True),
+        'upper papa': Key('P', static=True),
+        'upper queen': Key('Q', static=True),
+        'upper romeo': Key('R', static=True),
+        'upper sierra': Key('S', static=True),
+        'upper tango': Key('T', static=True),
+        'upper uniform': Key('U', static=True),
+        'upper victor': Key('V', static=True),
+        'upper whiskey': Key('W', static=True),
+        'upper x-ray': Key('X', static=True),
+        'upper yankee': Key('Y', static=True),
+        'upper zulu': Key('Z', static=True),
+
+        'zero': Key('0'),
+        'one': Key('1'),
+        'two': Key('2'),
+        'three': Key('3'),
+        'four': Key('4'),
+        'five': Key('5'),
+        'six': Key('6'),
+        'seven': Key('7'),
+        'eight': Key('8'),
+        'nine': Key('9'),
+	}
+
+letter = RuleRef(rule=LetterRule(), name='letter')
+letter_sequence = Repetition(letter, min=1, max=32, name='letter_sequence')
+
+def execute_letter(letter):
+    letter.execute()
+
+def execute_letter_sequence(letter_sequence):
+    for letter in letter_sequence:
+        letter.execute()
+
+spell_rule = MappingRule(
+	name = "letter mapping",
+	mapping = {
+		"press <letter_sequence>": Function(execute_letter_sequence),
+		"spell <letter_sequence>": Function(start_insert)
+		                            + Function(execute_letter_sequence)
+									+ Function(end_insert),
+	},
+	extras = [
+		letter_sequence
+	],
 )
 
 """
@@ -279,7 +400,10 @@ edit_rule = MappingRule(
 		"[<n>] undo": Text("%(n)s") + Key("u"),
 		"[<n>] redo": Text("%(n)s") + Key("c-r"),
 
-		"line end delete": Key("s-d"),
+
+		"[<n>] (care|cares) delete": Text("%(n)s") + Key("d") + Key("l"),
+		"[<n>] (care|cares) yank":   Text("%(n)s") + Key("y") + Key("l"),
+		"[<n>] (care|cares) change": Text("%(n)s") + Key("c") + Key("l") + Function(set_mode_immediate),
 
 		"[<n>] (term|terms) delete": Text("%(n)s") + Key("d") + Key("w"),
 		"[<n>] (term|terms) yank":   Text("%(n)s") + Key("y") + Key("w"),
@@ -293,6 +417,7 @@ edit_rule = MappingRule(
 		"[<n>] (line|lines) yank":   Text("%(n)s") + Key("y") + Key("y"),
 		"[<n>] (line|lines) change": Text("%(n)s") + Key("c") + Key("c") + Function(set_mode_immediate),
 		"[<n>] (line|lines) join":   Text("%(n)s") + Key("s-j"),
+		"line end delete": Key("s-d"),
 
 		"[<n>] paste (before|above)": Text("%(n)s") + Key("P"),
 		"[<n>] paste (after|below)":  Text("%(n)s") + Key("p"),
@@ -300,6 +425,8 @@ edit_rule = MappingRule(
 		"bracket match": Key("percent"),
 
 		"repeat": Key("."),
+
+		"[<n>] case toggle": Text("%(n)s") + Key("~"),
 		},
 	extras = [
 		Integer("n", 1, 20),
@@ -324,6 +451,7 @@ def build_grammar(context):
 	grammar.add_rule(edit_rule)
 	grammar.add_rule(insert_rule)
 	grammar.add_rule(window_rule)
+	grammar.add_rule(spell_rule)
 	return grammar
 
 
