@@ -298,7 +298,7 @@ insert_rule = MappingRule(
 # TODO Get URL
 class SymbolRule(MappingRule):
     name = "symbol"
-    export = True
+    exported = False
     mapping = {
 		"colon":       Key("colon"),
 		"semi[colon]": Key("semicolon"),
@@ -333,34 +333,34 @@ class SymbolRule(MappingRule):
 
 class LetterRule(MappingRule):
     name = "letter"
-    export = True
+    exported = False
     mapping = {
-        'alpha': Key('a', static=True),
-        'bravo': Key('b', static=True),
-        'charlie': Key('c', static=True),
-        'delta': Key('d', static=True),
-        'echo': Key('e', static=True),
-        'foxtrot': Key('f', static=True),
-        'golf': Key('g', static=True),
-        'hotel': Key('h', static=True),
-        'india': Key('i', static=True),
-        'juliet': Key('j', static=True),
-        'kilo': Key('k', static=True),
-        'lima': Key('l', static=True),
-        'mike': Key('m', static=True),
-        'november': Key('n', static=True),
-        'oscar': Key('o', static=True),
-        'papa': Key('p', static=True),
-        'queen': Key('q', static=True),
-        'romeo': Key('r', static=True),
-        'sierra': Key('s', static=True),
-        'tango': Key('t', static=True),
-        'uniform': Key('u', static=True),
-        'victor': Key('v', static=True),
-        'whiskey': Key('w', static=True),
+        'ash':   Key('a', static=True),
+        'bug':   Key('b', static=True),
+        'chip':  Key('c', static=True),
+        'dog':   Key('d', static=True),
+        'egg':   Key('e', static=True),
+        'flame': Key('f', static=True),
+        'giga':  Key('g', static=True),
+        'hub':   Key('h', static=True),
+        'ice':   Key('i', static=True),
+        'jack':  Key('j', static=True),
+        'king':  Key('k', static=True),
+        'lash':  Key('l', static=True),
+        'mule':  Key('m', static=True),
+        'net':   Key('n', static=True),
+        'oak':   Key('o', static=True),
+        'page':  Key('p', static=True),
+        'quail': Key('q', static=True),
+        'raft':  Key('r', static=True),
+        'scout': Key('s', static=True),
+        'tide':  Key('t', static=True),
+        'use':   Key('u', static=True),
+        'vast':  Key('v', static=True),
+        'whale': Key('w', static=True),
         'x-ray': Key('x', static=True),
-        'yankee': Key('y', static=True),
-        'zebra': Key('z', static=True),
+        'yacht': Key('y', static=True),
+        'zed':   Key('z', static=True),
 
         'upper alpha': Key('A', static=True),
         'upper bravo': Key('B', static=True),

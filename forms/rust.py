@@ -30,8 +30,6 @@ rust_rule = MappingRule(
 )
 
 
-
-
 def build_grammar(context):
 	grammar = Grammar("rust", context=(context))
 	grammar.add_rule(rust_rule)  
