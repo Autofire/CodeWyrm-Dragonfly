@@ -2,12 +2,6 @@ from sys import stdout
 from dragonfly import (Grammar, CompoundRule, AppContext, FuncContext,
                        MappingRule, Function, PlaySound)
 
-#from forms import *
-
-import forms.vim
-import forms.bash
-import forms.rust
-
 # TODO Maybe remove this?
 import logging
 logging.basicConfig()
@@ -30,10 +24,24 @@ def play_sound(name):
 
 """
 ========================================================================
+= Initial import
+========================================================================
+"""
+try:
+	import forms.vim
+	import forms.bash
+	import forms.rust
+except:
+	play_sound("error")
+	raise
+
+
+"""
+========================================================================
 = Form config
 ========================================================================
 """
-grammars = []
+form_grammars = []
 
 _bash_vim = False
 def bash_vim(value=None):
@@ -50,17 +58,38 @@ def bash_vim(value=None):
 
 	return _bash_vim
 
-def load_forms():
-	print("Loading forms...")
-	reload(forms.vim)
-	reload(forms.bash)
-	reload(forms.rust)
-	config_forms()
-	print("Done.\n")
+def load_forms(unload=False):
+	global form_grammars
 
-def config_forms():
-	global grammars
-	#grammars = []
+	try:
+		if unload:
+			print("Reloading forms...")
+			reload(forms.vim)
+			reload(forms.bash)
+			reload(forms.rust)
+		else:
+			print("Performing first config...")
+			
+		# Do this before unloading in case of exception
+		new_form_grammars = build_form_grammars()
+
+		# Always safe to unload
+		unload_forms()
+
+		form_grammars = new_form_grammars
+
+		for grammar in form_grammars:
+			grammar.load()
+		print("Done.\n")
+		play_sound("refresh")
+	except:
+		play_sound("error")
+		raise
+		
+
+def build_form_grammars():
+	#global form_grammars
+	#form_grammars = []
 
 	putty_context = AppContext(title="bash")
 	extraterm_context = AppContext(executable="extraterm")
@@ -76,22 +105,27 @@ def config_forms():
 	#forms.bash.grammar.context = bash_context
 	#forms.bash.grammar.load()
 
-	grammars = [
+	new_form_grammars = [
 		forms.bash.build_grammar(bash_context),
 		forms.vim.build_grammar(vim_context),
 		forms.rust.build_grammar(vim_context),
 	]
 
-	for grammar in grammars:
-		grammar.load()
+	return new_form_grammars
+
 
 def unload_forms():
 	stdout.write("Unloading forms...")
-	global grammars
-	for grammar in grammars:
+	global form_grammars
+	for grammar in form_grammars:
 		grammar.unload()
-	grammars = []
-	print("done")
+	
+	if len(form_grammars) > 0:
+		print("done.")
+	else:
+		print("nothing to unload.")
+
+	form_grammars = []
 
 
 """
@@ -103,13 +137,7 @@ class FormReloader(CompoundRule):
 	spec = "dragon refresh"
 
 	def _process_recognition(self, node, extras): 
-		try:
-			unload_forms()
-			load_forms()
-			play_sound("refresh")
-		except:
-			play_sound("error")
-			raise
+		load_forms(unload=True)
 
 shift_rule = MappingRule(
 	name = "shift",
@@ -127,9 +155,7 @@ formGrammar.add_rule(shift_rule)
 formGrammar.load()
 
 
-
 load_forms()
-play_sound("refresh")
 
 # Unload function which will be called by natlink at unload time.
 def unload():

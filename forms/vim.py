@@ -2,7 +2,7 @@ from dragonfly import (Grammar, AppContext,
                        MappingRule, CompoundRule,
                        Dictation, Integer, Repeat,
 					   IntegerRef, RuleRef,
-					   Literal, Sequence, Repetition,
+					   Literal, Sequence, Repetition, Alternative,
                        Key, Text, Function)
 
 print("Loading grammar: vim")
@@ -228,36 +228,36 @@ insert_rule = MappingRule(
 
 		"[<n>] slap": Key("enter") * Repeat(extra="n"),
 
-		"(minus|dash)":   Function(insert, action=Key("minus")),
-		"plus":           Function(insert, action=Key("plus")),
-		"(slash|divide)": Function(insert, action=Key("slash")),
-		"(star|times)":   Function(insert, action=Key("star")),
+		#"(minus|dash)":   Function(insert, action=Key("minus")),
+		#"plus":           Function(insert, action=Key("plus")),
+		#"(slash|divide)": Function(insert, action=Key("slash")),
+		#"(star|times)":   Function(insert, action=Key("star")),
 
-		"space":     Function(insert, action=Key("space")),
-		"backslash": Function(insert, action=Key("backslash")),
-		"tab":       Function(insert, action=Key("tab")),
-		"score":     Function(insert, action=Key("underscore")),
+		#"space":     Function(insert, action=Key("space")),
+		#"backslash": Function(insert, action=Key("backslash")),
+		#"tab":       Function(insert, action=Key("tab")),
+		#"score":     Function(insert, action=Key("underscore")),
 
-		"colon":     Function(insert, action=Key("colon")),
-		"semi":      Function(insert, action=Key("semicolon")),
-        "com":       Function(insert, action=Key('comma')),
-        "equals":    Function(insert, action=Key('=')),
-        "bang":      Function(insert, action=Key('!')),
-        "dot":       Function(insert, action=Key('.')),
-        "amp":       Function(insert, action=Key('&')),
+		#"colon":     Function(insert, action=Key("colon")),
+		#"semi":      Function(insert, action=Key("semicolon")),
+    	#"com":       Function(insert, action=Key('comma')),
+    	#"equals":    Function(insert, action=Key('=')),
+    	#"bang":      Function(insert, action=Key('!')),
+    	#"dot":       Function(insert, action=Key('.')),
+    	#"amp":       Function(insert, action=Key('&')),
 
 
-		"len":       Function(insert, action=Key("(")),
-		"ren":       Function(insert, action=Key(")")),
-		"lace":      Function(insert, action=Key("{")),
-		"race":      Function(insert, action=Key("}")),
-		"lack":      Function(insert, action=Key("[")),
-		"rack":      Function(insert, action=Key("]")),
-        "langle":    Function(insert, action=Key('langle')),
-        "rangle":    Function(insert, action=Key('rangle')),
+		#"len":       Function(insert, action=Key("(")),
+		#"ren":       Function(insert, action=Key(")")),
+		#"lace":      Function(insert, action=Key("{")),
+		#"race":      Function(insert, action=Key("}")),
+		#"lack":      Function(insert, action=Key("[")),
+		#"rack":      Function(insert, action=Key("]")),
+    	#"langle":    Function(insert, action=Key('langle')),
+    	#"rangle":    Function(insert, action=Key('rangle')),
 
-        "single":    Function(insert, action=Key('squote')),
-        "double":    Function(insert, action=Key('dquote')),
+    	#"single":    Function(insert, action=Key('squote')),
+    	#"double":    Function(insert, action=Key('dquote')),
 
 		"singles": Function(wrapped_insert, start = "'", end = "'"),
 		"doubles": Function(wrapped_insert, start = '"', end = '"'),
@@ -296,6 +296,41 @@ insert_rule = MappingRule(
 """
 # Credit for most of this logic goes to Christo Butcher and David Gessner
 # TODO Get URL
+class SymbolRule(MappingRule):
+    name = "symbol"
+    export = True
+    mapping = {
+		"colon":       Key("colon"),
+		"semi[colon]": Key("semicolon"),
+    	"comma":         Key('comma'),
+    	"equals":      Key('='),
+    	"bang":        Key('!'),
+    	"dot":         Key('.'),
+    	"amp":         Key('&'),
+
+		"(minus|dash)":   Key("minus"),
+		"plus":           Key("plus"),
+		"(slash|divide)": Key("slash"),
+		"(star|times)":   Key("star"),
+
+		"space":     Key("space"),
+		"backslash": Key("backslash"),
+		"tab":       Key("tab"),
+		"score":     Key("underscore"),
+
+		"len":       Key("("),
+		"ren":       Key(")"),
+		"lace":      Key("{"),
+		"race":      Key("}"),
+		"lack":      Key("["),
+		"rack":      Key("]"),
+        "langle":    Key('langle'),
+        "rangle":    Key('rangle'),
+
+        "single":    Key('squote'),
+        "double":    Key('dquote'),
+	}
+
 class LetterRule(MappingRule):
     name = "letter"
     export = True
@@ -325,7 +360,7 @@ class LetterRule(MappingRule):
         'whiskey': Key('w', static=True),
         'x-ray': Key('x', static=True),
         'yankee': Key('y', static=True),
-        'zulu': Key('z', static=True),
+        'zebra': Key('z', static=True),
 
         'upper alpha': Key('A', static=True),
         'upper bravo': Key('B', static=True),
@@ -366,8 +401,15 @@ class LetterRule(MappingRule):
         'nine': Key('9'),
 	}
 
+symbol = RuleRef(rule=SymbolRule(), name='symbol')
 letter = RuleRef(rule=LetterRule(), name='letter')
-letter_sequence = Repetition(letter, min=1, max=32, name='letter_sequence')
+letter_sequence = Repetition(
+	Alternative([letter, symbol]),
+	min=1, max=32, name='letter_sequence'
+)
+
+def execute_symbol(symbol):
+    symbol.execute()
 
 def execute_letter(letter):
     letter.execute()
@@ -380,12 +422,26 @@ spell_rule = MappingRule(
 	name = "letter mapping",
 	mapping = {
 		"press <letter_sequence>": Function(execute_letter_sequence),
-		"spell <letter_sequence>": Function(start_insert)
-		                            + Function(execute_letter_sequence)
-									+ Function(end_insert),
+		"spell <letter_sequence>":
+			Function(start_insert)
+			  + Function(execute_letter_sequence)
+			  + Function(end_insert),
+
+		# TODO Figure out how to bundle this into the rule below via defaults
+		"<symbol>":
+			Function(start_insert)
+		      + Function(execute_symbol)
+			  + Function(end_insert),
+
+		"<symbol> <letter_sequence>":
+			Function(start_insert)
+		      + Function(execute_symbol)
+		      + Function(execute_letter_sequence)
+			  + Function(end_insert),
 	},
 	extras = [
-		letter_sequence
+		letter_sequence,
+		symbol
 	],
 )
 
