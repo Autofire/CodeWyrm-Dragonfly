@@ -70,8 +70,9 @@ def form_spoken(form):
 	else:
 		return names[0]
 	
-def form_context(form):
-	FuncContext(lambda: active_form() == form ) 
+def build_form_context(form):
+	return FuncContext(lambda: active_form() == form ) 
+
 
 def active_form(value=None):
 	global _active_form
@@ -144,15 +145,12 @@ def build_grammars():
 	bash_context = (bash_base_context & ~vim_bash_override_context)
 	vim_context  = (bash_base_context & vim_bash_override_context)
 
-	#bash_grammar = forms.bash.build_grammar(bash_context)
-	#bash_grammar.load()
-	#forms.bash.grammar.context = bash_context
-	#forms.bash.grammar.load()
+	rust_context = vim_context & build_form_context(L_RUST)
 
 	new_grammars = [
 		forms.bash.build_grammar(bash_context),
 		forms.vim.build_grammar(vim_context),
-		forms.rust.build_grammar(vim_context),
+		forms.rust.build_grammar(rust_context),
 	]
 	#new_grammars = {
 	#	'_bash': forms.bash.build_grammar(bash_context),
