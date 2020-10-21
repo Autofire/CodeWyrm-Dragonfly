@@ -147,7 +147,7 @@ def set_default_mode(new_mode):
 	default_mode = new_mode
 	set_mode(new_mode)
 
-def insert(action, space=True):
+def insert(action, space=False):
 	start_insert()
 	action.execute()
 	end_insert(space)
@@ -158,6 +158,9 @@ def wrapped_insert(start, end):
 	Text(start + end).execute()
 	Key("left:" + str(len(end))).execute()
 
+def do_insert(text):
+	return Function(insert, action=Text(text))
+
 def start_insert():
 	global mode
 	global default_mode
@@ -165,7 +168,7 @@ def start_insert():
 	if   mode == APPEND_MODE: Key("a").execute()
 	elif mode == INSERT_MODE: Key("i").execute()
 
-def end_insert(space=True):
+def end_insert(space=False):
 	global mode
 
 	if(mode != IMMEDIATE_MODE): 
@@ -227,37 +230,6 @@ insert_rule = MappingRule(
 
 
 		"[<n>] slap": Key("enter") * Repeat(extra="n"),
-
-		#"(minus|dash)":   Function(insert, action=Key("minus")),
-		#"plus":           Function(insert, action=Key("plus")),
-		#"(slash|divide)": Function(insert, action=Key("slash")),
-		#"(star|times)":   Function(insert, action=Key("star")),
-
-		#"space":     Function(insert, action=Key("space")),
-		#"backslash": Function(insert, action=Key("backslash")),
-		#"tab":       Function(insert, action=Key("tab")),
-		#"score":     Function(insert, action=Key("underscore")),
-
-		#"colon":     Function(insert, action=Key("colon")),
-		#"semi":      Function(insert, action=Key("semicolon")),
-    	#"com":       Function(insert, action=Key('comma')),
-    	#"equals":    Function(insert, action=Key('=')),
-    	#"bang":      Function(insert, action=Key('!')),
-    	#"dot":       Function(insert, action=Key('.')),
-    	#"amp":       Function(insert, action=Key('&')),
-
-
-		#"len":       Function(insert, action=Key("(")),
-		#"ren":       Function(insert, action=Key(")")),
-		#"lace":      Function(insert, action=Key("{")),
-		#"race":      Function(insert, action=Key("}")),
-		#"lack":      Function(insert, action=Key("[")),
-		#"rack":      Function(insert, action=Key("]")),
-    	#"langle":    Function(insert, action=Key('langle')),
-    	#"rangle":    Function(insert, action=Key('rangle')),
-
-    	#"single":    Function(insert, action=Key('squote')),
-    	#"double":    Function(insert, action=Key('dquote')),
 
 		"singles": Function(wrapped_insert, start = "'", end = "'"),
 		"doubles": Function(wrapped_insert, start = '"', end = '"'),

@@ -30,7 +30,16 @@ def play_sound(name):
 try:
 	import forms.vim
 	import forms.bash
+
 	import forms.rust
+	import forms.cpp
+	import forms.cs
+	import forms.java
+	import forms.python
+
+	import forms.unity
+	import forms.unreal
+
 except:
 	play_sound("error")
 	raise
@@ -45,13 +54,13 @@ grammars = []
 
 # Generate our form tags
 # We could use strings but that's gross
-L_NONE, L_CPP, L_C_SHARP, L_JAVA, L_PYTHON, L_RUST, L_UNITY, L_UNREAL = range(8)
+L_NONE, L_CPP, L_CS, L_JAVA, L_PYTHON, L_RUST, L_UNITY, L_UNREAL = range(8)
 
 # First is print, second is spoken. If just one, they are same.
 form_names = {
 	L_NONE: ["None", "!None"],
 	L_CPP: ["C++", "C plus plus"],
-	L_C_SHARP: ["C#", "C sharp"],
+	L_CS: ["C#", "C sharp"],
 	L_JAVA: ["Java"],
 	L_PYTHON: ["Python"],
 	L_RUST: ["Rust"],
@@ -71,7 +80,10 @@ def form_spoken(form):
 		return names[0]
 	
 def build_form_context(form):
-	return FuncContext(lambda: active_form() == form ) 
+	def is_in_form():
+		return active_form() == form
+
+	return FuncContext(is_in_form) 
 
 
 def active_form(value=None):
@@ -112,9 +124,16 @@ def load_forms(unload=False):
 	try:
 		if unload:
 			print("Reloading forms...")
-			reload(forms.vim)
 			reload(forms.bash)
-			reload(forms.rust)
+			reload(forms.vim)
+
+			reload(forms.rust  )
+			reload(forms.cpp   )
+			reload(forms.cs    )
+			reload(forms.java  )
+			reload(forms.python)
+			reload(forms.unity)
+			reload(forms.unreal)
 		else:
 			print("Performing first config...")
 			
@@ -145,12 +164,18 @@ def build_grammars():
 	bash_context = (bash_base_context & ~vim_bash_override_context)
 	vim_context  = (bash_base_context & vim_bash_override_context)
 
-	rust_context = vim_context & build_form_context(L_RUST)
-
 	new_grammars = [
 		forms.bash.build_grammar(bash_context),
 		forms.vim.build_grammar(vim_context),
-		forms.rust.build_grammar(rust_context),
+
+		forms.rust  .build_grammar(vim_context & build_form_context(L_RUST)),
+		forms.cpp   .build_grammar(vim_context & build_form_context(L_CPP)),
+		forms.cs    .build_grammar(vim_context & build_form_context(L_CS)),
+		forms.java  .build_grammar(vim_context & build_form_context(L_JAVA)),
+		forms.python.build_grammar(vim_context & build_form_context(L_PYTHON)),
+
+		forms.unity .build_grammar(vim_context & build_form_context(L_UNITY)),
+		forms.unreal.build_grammar(vim_context & build_form_context(L_UNREAL)),
 	]
 	#new_grammars = {
 	#	'_bash': forms.bash.build_grammar(bash_context),
