@@ -12,9 +12,12 @@ rust_rule = MappingRule(
 		"arrow": Function(insert, action=Text("=>")),
 		"function": Function(insert, action=Text("fn")),
 		"mut": Function(insert, action=Text("mut")),
+		"let": Function(insert, action=Text("let")),
+		"in out": Function(insert, action=Text("io")),
 
 		"standard in": Function(insert, action=Text("stdin")),
 		"standard out": Function(insert, action=Text("stdout")),
+		"standard": Function(insert, action=Text("std")),
 
 		"okay": Function(insert, action=Text("Ok")),
 		"error": Function(insert, action=Text("Err")),
@@ -22,6 +25,9 @@ rust_rule = MappingRule(
 		"compare": Function(insert, action=Text("cmp")),
 
 		"say numb": Function(insert, action=Text("num")),
+		"say guess": Function(insert, action=Text("guess")),
+
+		"unsigned thirty two": Function(insert, action=Text("u32")),
 
 		},
 	extras = [

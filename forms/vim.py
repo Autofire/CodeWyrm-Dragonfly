@@ -302,7 +302,7 @@ class SymbolRule(MappingRule):
     mapping = {
 		"colon":       Key("colon"),
 		"semi[colon]": Key("semicolon"),
-    	"comma":         Key('comma'),
+    	"(com|comma)": Key('comma'),
     	"equals":      Key('='),
     	"bang":        Key('!'),
     	"dot":         Key('.'),
@@ -331,75 +331,36 @@ class SymbolRule(MappingRule):
         "double":    Key('dquote'),
 	}
 
+letter_names = [
+	'ash', 'bug', 'chip', 'dog', 'egg', 'flame',
+	'giga', 'hub', 'ice', 'jack', 'king', 'lash',
+	'mule', 'net', 'oak', 'page', 'quail', 'raft',
+	'scout', 'tide', 'use', 'vast', 'whale', 'x-ray',
+	'yacht', 'zed'
+]
+print(letter_names)
+
+letter_map = {
+	'zero':  Key('0'),
+	'one':   Key('1'),
+	'two':   Key('2'),
+	'three': Key('3'),
+	'four':  Key('4'),
+	'five':  Key('5'),
+	'six':   Key('6'),
+	'seven': Key('7'),
+	'eight': Key('8'),
+	'nine':  Key('9'),
+}
+for name in letter_names:
+	letter_map[name] = Key(name[0], static=True)
+	letter_map["cap " + name] = Key(name[0].upper(), static=True)
+
+
 class LetterRule(MappingRule):
     name = "letter"
     exported = False
-    mapping = {
-        'ash':   Key('a', static=True),
-        'bug':   Key('b', static=True),
-        'chip':  Key('c', static=True),
-        'dog':   Key('d', static=True),
-        'egg':   Key('e', static=True),
-        'flame': Key('f', static=True),
-        'giga':  Key('g', static=True),
-        'hub':   Key('h', static=True),
-        'ice':   Key('i', static=True),
-        'jack':  Key('j', static=True),
-        'king':  Key('k', static=True),
-        'lash':  Key('l', static=True),
-        'mule':  Key('m', static=True),
-        'net':   Key('n', static=True),
-        'oak':   Key('o', static=True),
-        'page':  Key('p', static=True),
-        'quail': Key('q', static=True),
-        'raft':  Key('r', static=True),
-        'scout': Key('s', static=True),
-        'tide':  Key('t', static=True),
-        'use':   Key('u', static=True),
-        'vast':  Key('v', static=True),
-        'whale': Key('w', static=True),
-        'x-ray': Key('x', static=True),
-        'yacht': Key('y', static=True),
-        'zed':   Key('z', static=True),
-
-        'upper alpha': Key('A', static=True),
-        'upper bravo': Key('B', static=True),
-        'upper charlie': Key('C', static=True),
-        'upper delta': Key('D', static=True),
-        'upper echo': Key('E', static=True),
-        'upper foxtrot': Key('F', static=True),
-        'upper golf': Key('G', static=True),
-        'upper hotel': Key('H', static=True),
-        'upper india': Key('I', static=True),
-        'upper juliet': Key('J', static=True),
-        'upper kilo': Key('K', static=True),
-        'upper lima': Key('L', static=True),
-        'upper mike': Key('M', static=True),
-        'upper november': Key('N', static=True),
-        'upper oscar': Key('O', static=True),
-        'upper papa': Key('P', static=True),
-        'upper queen': Key('Q', static=True),
-        'upper romeo': Key('R', static=True),
-        'upper sierra': Key('S', static=True),
-        'upper tango': Key('T', static=True),
-        'upper uniform': Key('U', static=True),
-        'upper victor': Key('V', static=True),
-        'upper whiskey': Key('W', static=True),
-        'upper x-ray': Key('X', static=True),
-        'upper yankee': Key('Y', static=True),
-        'upper zulu': Key('Z', static=True),
-
-        'zero': Key('0'),
-        'one': Key('1'),
-        'two': Key('2'),
-        'three': Key('3'),
-        'four': Key('4'),
-        'five': Key('5'),
-        'six': Key('6'),
-        'seven': Key('7'),
-        'eight': Key('8'),
-        'nine': Key('9'),
-	}
+    mapping = letter_map 
 
 symbol = RuleRef(rule=SymbolRule(), name='symbol')
 letter = RuleRef(rule=LetterRule(), name='letter')
@@ -457,21 +418,25 @@ edit_rule = MappingRule(
 		"[<n>] redo": Text("%(n)s") + Key("c-r"),
 
 
-		"[<n>] (care|cares) delete": Text("%(n)s") + Key("d") + Key("l"),
-		"[<n>] (care|cares) yank":   Text("%(n)s") + Key("y") + Key("l"),
-		"[<n>] (care|cares) change": Text("%(n)s") + Key("c") + Key("l") + Function(set_mode_immediate),
+		"[<n>] (care|cares) delete": Text("%(n)s") + Text("dl"),
+		"[<n>] (care|cares) yank":   Text("%(n)s") + Text("yl"),
+		"[<n>] (care|cares) change": Text("%(n)s") + Text("cl")
+			+ Function(set_mode_immediate),
 
-		"[<n>] (term|terms) delete": Text("%(n)s") + Key("d") + Key("w"),
-		"[<n>] (term|terms) yank":   Text("%(n)s") + Key("y") + Key("w"),
-		"[<n>] (term|terms) change": Text("%(n)s") + Key("c") + Key("w") + Function(set_mode_immediate),
+		"[<n>] (term|terms) delete": Text("%(n)s") + Text("dw"),
+		"[<n>] (term|terms) yank":   Text("%(n)s") + Text("yw"),
+		"[<n>] (term|terms) change": Text("%(n)s") + Text("cw")
+			+ Function(set_mode_immediate),
 
-		"[<n>] (word|words) delete": Text("%(n)s") + Key("d") + Key("W"),
-		"[<n>] (word|words) yank":   Text("%(n)s") + Key("y") + Key("W"),
-		"[<n>] (word|words) change": Text("%(n)s") + Key("c") + Key("W") + Function(set_mode_immediate),
+		"[<n>] (word|words) delete": Text("%(n)s") + Text("dW"),
+		"[<n>] (word|words) yank":   Text("%(n)s") + Text("yW"),
+		"[<n>] (word|words) change": Text("%(n)s") + Text("cW")
+			+ Function(set_mode_immediate),
 
-		"[<n>] (line|lines) delete": Text("%(n)s") + Key("d") + Key("d"),
-		"[<n>] (line|lines) yank":   Text("%(n)s") + Key("y") + Key("y"),
-		"[<n>] (line|lines) change": Text("%(n)s") + Key("c") + Key("c") + Function(set_mode_immediate),
+		"[<n>] (line|lines) delete": Text("%(n)s") + Text("dd"),
+		"[<n>] (line|lines) yank":   Text("%(n)s") + Text("yy"),
+		"[<n>] (line|lines) change": Text("%(n)s") + Text("cc")
+			+ Function(set_mode_immediate),
 		"[<n>] (line|lines) join":   Text("%(n)s") + Key("s-j"),
 		"line end delete": Key("s-d"),
 
@@ -492,6 +457,14 @@ edit_rule = MappingRule(
 		"n": 1,
 		}
 )
+
+
+"""
+========================================================================
+= Help grammar
+========================================================================
+"""
+
 
 
 """
