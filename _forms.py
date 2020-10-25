@@ -157,12 +157,19 @@ def load_forms(unload=False):
 def build_grammars():
 	putty_context = AppContext(title="bash")
 	extraterm_context = AppContext(executable="extraterm")
+	netbeans_context = AppContext(executable="netbeans64")
+	intellij_context = AppContext(executable="idea64")
+	vs_context = AppContext(title="Visual Studio")
 
 	bash_base_context = putty_context | extraterm_context;
 	vim_bash_override_context = FuncContext(bash_vim) | AppContext(title="VIM")
 
 	bash_context = (bash_base_context & ~vim_bash_override_context)
-	vim_context  = (bash_base_context & vim_bash_override_context)
+	
+	bash_vim_context = (bash_base_context & vim_bash_override_context)
+	vim_context = bash_vim_context | netbeans_context | intellij_context | vs_context
+
+	java_context = vim_context & (build_form_context(L_JAVA) | netbeans_context | intellij_context)
 
 	new_grammars = [
 		forms.bash.build_grammar(bash_context),
@@ -171,11 +178,12 @@ def build_grammars():
 		forms.rust  .build_grammar(vim_context & build_form_context(L_RUST)),
 		forms.cpp   .build_grammar(vim_context & build_form_context(L_CPP)),
 		forms.cs    .build_grammar(vim_context & build_form_context(L_CS)),
-		forms.java  .build_grammar(vim_context & build_form_context(L_JAVA)),
-		forms.python.build_grammar(vim_context & build_form_context(L_PYTHON)),
+		#forms.java  .build_grammar(vim_context & build_form_context(L_JAVA)),
+		forms.java  .build_grammar(java_context),
+		#forms.python.build_grammar(vim_context & build_form_context(L_PYTHON)),
 
-		forms.unity .build_grammar(vim_context & build_form_context(L_UNITY)),
-		forms.unreal.build_grammar(vim_context & build_form_context(L_UNREAL)),
+		#forms.unity .build_grammar(vim_context & build_form_context(L_UNITY)),
+		#forms.unreal.build_grammar(vim_context & build_form_context(L_UNREAL)),
 	]
 	#new_grammars = {
 	#	'_bash': forms.bash.build_grammar(bash_context),
@@ -188,15 +196,16 @@ def build_grammars():
 
 
 def unload_forms():
-	stdout.write("Unloading forms...")
 	global grammars
+
+	if len(grammars) > 0:
+		stdout.write("Unloading forms...")
+
 	for grammar in grammars:
 		grammar.unload()
 	
 	if len(grammars) > 0:
 		print("done.")
-	else:
-		print("nothing to unload.")
 
 	grammars = []
 
@@ -233,7 +242,7 @@ control_grammar.add_rule(control_rule)
 control_grammar.add_rule(form_rule)
 control_grammar.load()
 
-load_forms()
+load_forms(unload=True)
 
 # Unload function which will be called by natlink at unload time.
 def unload():

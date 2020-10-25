@@ -16,6 +16,7 @@ swallow_rule = MappingRule(
 	name = "swallow",
 	mapping = {
 		"<text>": Text(""),
+		"go to sleep": Key("npdiv"),
 		},
 	extras = [
 		Dictation("text"),
@@ -203,6 +204,8 @@ insert_rule = MappingRule(
 		"default insert": Function(set_default_mode, new_mode=INSERT_MODE),
 		"default append": Function(set_default_mode, new_mode=APPEND_MODE),
 
+		"dictate": Function(start_insert) + Function(set_mode_immediate) + Key("cs-npmul"),
+
 		"say <text>":           Function(start_insert)
 		                         + Text("%(text)s")
 								 + Function(end_insert),
@@ -237,8 +240,8 @@ insert_rule = MappingRule(
 		
         "[<n>] (line|lines) break":  Function(insert, action=Key("enter"), space=False)
 		                              * Repeat(extra="n"),
-		"line insert below": Key("o")   + Function(set_mode_immediate),
-		"line insert above": Key("s-o") + Function(set_mode_immediate),
+		"insert line below": Key("o")   + Function(set_mode_immediate),
+		"insert line above": Key("s-o") + Function(set_mode_immediate),
 
 		"[<n>] backs":  Key("backspace") * Repeat(extra="n"),
 		},
