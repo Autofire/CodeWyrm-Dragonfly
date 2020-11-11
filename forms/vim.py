@@ -3,7 +3,8 @@ from dragonfly import (Grammar, AppContext,
                        Dictation, Integer, Repeat,
 					   IntegerRef, RuleRef,
 					   Literal, Sequence, Repetition, Alternative,
-                       Key, Text, Function)
+                       Key, Text, Function, ActionBase)
+from sounds import play_sound, make_sound_action
 
 print("Loading grammar: vim")
 
@@ -140,6 +141,9 @@ def set_mode(new_mode):
 	global mode
 	mode = new_mode
 
+	if new_mode == IMMEDIATE_MODE:
+		play_sound("mode imm")
+
 def set_mode_immediate():
 	set_mode(IMMEDIATE_MODE)
 
@@ -178,11 +182,12 @@ def end_insert(space=False):
 		issue_escape()
 
 def issue_escape():
-	global mode
-	global default_mode
+	#global mode
+	#global default_mode
 
 	Key("escape").execute()
-	mode = default_mode
+	#mode = default_mode
+	set_mode(default_mode)
 
 def upper_first(text):
 	if(len(text) > 1):
@@ -192,11 +197,20 @@ def upper_first(text):
 	else:
 		return text
 
+def lower_first(text):
+	if(len(text) > 1):
+		return text[0].lower() + text[1:]
+	elif(len(text) == 1):
+		return text[0].lower()
+	else:
+		return text
+
 insert_rule = MappingRule(
 	name = "insert",
 	mapping = {
-		"escape": Function(issue_escape),
+		"escape": Function(issue_escape) + make_sound_action("mode cmd"),
 
+		"mode immediate": Function(set_mode_immediate),
 		"mode insert":  Key("i") + Function(set_mode_immediate),
 		"mode append":  Key("a") + Function(set_mode_immediate),
 		"mode replace": Key("R") + Function(set_mode_immediate),
@@ -232,7 +246,7 @@ insert_rule = MappingRule(
 								 + Function(end_insert),
 
 
-		"[<n>] slap": Key("enter") * Repeat(extra="n"),
+		"[<n>] enter": Key("enter") * Repeat(extra="n"),
 
 		"singles": Function(wrapped_insert, start = "'", end = "'"),
 		"doubles": Function(wrapped_insert, start = '"', end = '"'),
@@ -249,7 +263,7 @@ insert_rule = MappingRule(
 		Dictation("text"),
 		Dictation("snake_text").lower().replace(" ", "_"),
 		Dictation("const_text").upper().replace(" ", "_"),
-		Dictation("camel_text").camel(),
+		Dictation("camel_text").camel().apply(lower_first),
 		Dictation("pascal_text").camel().apply(upper_first),
 		Dictation("const_text").upper().replace(" ", "_"),
 		Dictation("lower_text").lower(),
@@ -282,11 +296,15 @@ class SymbolRule(MappingRule):
     	"bang":        Key('!'),
     	"dot":         Key('.'),
     	"amp":         Key('&'),
+    	"quest":       Key('?'),
+		"hash":        Key("#"),
+		"pipe":        Key("|"),
 
 		"(minus|dash)":   Key("minus"),
 		"plus":           Key("plus"),
 		"(slash|divide)": Key("slash"),
 		"(star|times)":   Key("star"),
+		"(mod|percent)":  Key("percent"),
 
 		"space":     Key("space"),
 		"backslash": Key("backslash"),
@@ -304,13 +322,15 @@ class SymbolRule(MappingRule):
 
         "single":    Key('squote'),
         "double":    Key('dquote'),
+
+		"slap":      Key('enter'),
 	}
 
 letter_names = [
-	'ash', 'bug', 'chip', 'dog', 'egg', 'flame',
-	'giga', 'hub', 'ice', 'jack', 'king', 'lash',
-	'mule', 'net', 'oak', 'page', 'quail', 'raft',
-	'scout', 'tide', 'use', 'vast', 'whale', 'x-ray',
+	'apple', 'beetle', 'club', 'diamond', 'egg', 'flame',
+	'giga', 'heart', 'index', 'jack', 'king', 'limbo',
+	'mule', 'net', 'oak', 'page', 'queen', 'raft',
+	'spade', 'tide', 'use', 'vast', 'whale', 'x-ray',
 	'yacht', 'zed'
 ]
 print(letter_names)
@@ -422,7 +442,7 @@ edit_rule = MappingRule(
 
 		"repeat": Key("."),
 
-		"[<n>] case toggle": Text("%(n)s") + Key("~"),
+		"[<n>] case (swap|toggle)": Text("%(n)s") + Key("~"),
 		},
 	extras = [
 		Integer("n", 1, 20),
@@ -456,6 +476,7 @@ def build_grammar(context):
 	grammar.add_rule(insert_rule)
 	grammar.add_rule(window_rule)
 	grammar.add_rule(spell_rule)
+
 	return grammar
 
 

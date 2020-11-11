@@ -19,6 +19,7 @@ keywords = [
 for keyword in keywords:
 	kw_rules[keyword] = do_insert(keyword)
 kw_rules["instance of"] = do_insert("instanceof")
+kw_rules["GL"] = do_insert("gl")
 
 types = [
 	"byte", "short", "int", "long",

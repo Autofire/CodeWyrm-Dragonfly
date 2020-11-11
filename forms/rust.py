@@ -86,7 +86,7 @@ simple_keywords = [
 "pure",
 "unsized",
 "virtual",
-"yield"
+"yield",
 ]
 for keyword in simple_keywords:
 	kw_rules[keyword] = do_insert(keyword)
@@ -97,6 +97,8 @@ complex_kw = {
 	"align of": "alignof",
 	"offset of": "offsetof",
 	"function": "fn",
+	"vector": "Vec",
+	"length": "len",
 }
 for key in complex_kw:
 	kw_rules[key] = do_insert(complex_kw[key])

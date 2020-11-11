@@ -1,25 +1,11 @@
 from sys import stdout
 from dragonfly import (Grammar, CompoundRule, AppContext, FuncContext,
                        MappingRule, Function, PlaySound)
+from forms.sounds import play_sound
 
 # TODO Maybe remove this?
 import logging
 logging.basicConfig()
-
-"""
-========================================================================
-= Sounds
-========================================================================
-"""
-sound_path = "C:\\Users\\Daniel\\DragonSounds\\mmbn\\"
-sounds = {
-	"refresh": sound_path + "refresh.wav",
-	"error": sound_path + "error.wav",
-	"shift": sound_path + "shift.wav",
-	"revert": sound_path + "revert.wav",
-}
-def play_sound(name):
-	PlaySound(file=sounds[name]).execute()
 
 
 """
@@ -103,7 +89,7 @@ def active_form(value=None):
 				
 	return _active_form
 
-_bash_vim = False
+_bash_vim = True
 def bash_vim(value=None):
 	global _bash_vim
 
@@ -159,7 +145,7 @@ def build_grammars():
 	extraterm_context = AppContext(executable="extraterm")
 	netbeans_context = AppContext(executable="netbeans64")
 	intellij_context = AppContext(executable="idea64")
-	vs_context = AppContext(title="Visual Studio")
+	vs_context = AppContext(executable="devenv")
 
 	bash_base_context = putty_context | extraterm_context;
 	vim_bash_override_context = FuncContext(bash_vim) | AppContext(title="VIM")
@@ -169,7 +155,9 @@ def build_grammars():
 	bash_vim_context = (bash_base_context & vim_bash_override_context)
 	vim_context = bash_vim_context | netbeans_context | intellij_context | vs_context
 
-	java_context = vim_context & (build_form_context(L_JAVA) | netbeans_context | intellij_context)
+	java_context = vim_context & (build_form_context(L_JAVA)
+	              | netbeans_context
+				  | intellij_context)
 
 	new_grammars = [
 		forms.bash.build_grammar(bash_context),
