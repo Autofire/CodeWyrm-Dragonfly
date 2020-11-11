@@ -141,11 +141,10 @@ def set_mode(new_mode):
 	global mode
 	mode = new_mode
 
-	if new_mode == IMMEDIATE_MODE:
-		play_sound("mode imm")
-
-def set_mode_immediate():
+def set_mode_immediate(silent=False):
 	set_mode(IMMEDIATE_MODE)
+	if not silent:
+		play_sound("mode imm")
 
 def set_default_mode(new_mode):
 	global default_mode

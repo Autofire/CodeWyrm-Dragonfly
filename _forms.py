@@ -15,8 +15,8 @@ logging.basicConfig()
 """
 try:
 	import forms.vim
-	import forms.bash
 
+	import forms.bash
 	import forms.rust
 	import forms.cpp
 	import forms.cs
@@ -40,11 +40,12 @@ grammars = []
 
 # Generate our form tags
 # We could use strings but that's gross
-L_NONE, L_CPP, L_CS, L_JAVA, L_PYTHON, L_RUST, L_UNITY, L_UNREAL = range(8)
+L_NONE, L_BASH, L_CPP, L_CS, L_JAVA, L_PYTHON, L_RUST, L_UNITY, L_UNREAL = range(9)
 
 # First is print, second is spoken. If just one, they are same.
 form_names = {
 	L_NONE: ["None", "!None"],
+	L_BASH: ["Bash"],
 	L_CPP: ["C++", "C plus plus"],
 	L_CS: ["C#", "C sharp"],
 	L_JAVA: ["Java"],
@@ -110,9 +111,9 @@ def load_forms(unload=False):
 	try:
 		if unload:
 			print("Reloading forms...")
-			reload(forms.bash)
 			reload(forms.vim)
 
+			reload(forms.bash)
 			reload(forms.rust  )
 			reload(forms.cpp   )
 			reload(forms.cs    )
@@ -132,6 +133,7 @@ def load_forms(unload=False):
 		grammars = new_grammars
 
 		for grammar in grammars:
+			print("Activating " + grammar.name)
 			grammar.load()
 		print("Done.\n")
 		play_sound("refresh")
@@ -147,22 +149,27 @@ def build_grammars():
 	intellij_context = AppContext(executable="idea64")
 	vs_context = AppContext(executable="devenv")
 
+	"""
 	bash_base_context = putty_context | extraterm_context;
 	vim_bash_override_context = FuncContext(bash_vim) | AppContext(title="VIM")
-
 	bash_context = (bash_base_context & ~vim_bash_override_context)
-	
 	bash_vim_context = (bash_base_context & vim_bash_override_context)
+
 	vim_context = bash_vim_context | netbeans_context | intellij_context | vs_context
+	"""
+
+	bash_context = putty_context | extraterm_context;
+
+	vim_context = bash_context | netbeans_context | intellij_context | vs_context
 
 	java_context = vim_context & (build_form_context(L_JAVA)
 	              | netbeans_context
 				  | intellij_context)
 
 	new_grammars = [
-		forms.bash.build_grammar(bash_context),
 		forms.vim.build_grammar(vim_context),
 
+		forms.bash  .build_grammar(vim_context & build_form_context(L_BASH)),
 		forms.rust  .build_grammar(vim_context & build_form_context(L_RUST)),
 		forms.cpp   .build_grammar(vim_context & build_form_context(L_CPP)),
 		forms.cs    .build_grammar(vim_context & build_form_context(L_CS)),
@@ -206,8 +213,8 @@ def unload_forms():
 control_rule = MappingRule(
 	name = "control",
 	mapping = {
-		"dragon enable vim":  Function(bash_vim, value=True),
-		"dragon disable vim": Function(bash_vim, value=False),
+		#"dragon enable vim":  Function(bash_vim, value=True),
+		#"dragon disable vim": Function(bash_vim, value=False),
 		"dragon refresh":     Function(load_forms, unload=True),
 	},
 	extras = [
@@ -217,6 +224,7 @@ control_rule = MappingRule(
 form_rule_mapping = {}
 for form in form_names.keys(): 
 	form_rule_mapping["dragon shift " + form_spoken(form)] = Function(active_form, value=form)
+form_rule_mapping["dragon shift Bash"] += Function(forms.vim.set_mode_immediate, silent=True)
 
 form_rule_mapping["dragon revert"] = Function(active_form, value=L_NONE)
 
