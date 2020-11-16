@@ -1,7 +1,7 @@
 from dragonfly import (Grammar,
                        MappingRule, CompoundRule,
                        Dictation, Key, Text, Function)
-from vim import wrapped_insert, insert, do_insert
+from base.vim import wrapped_insert, insert, do_insert
 
 print("Loading grammar: rust")
 

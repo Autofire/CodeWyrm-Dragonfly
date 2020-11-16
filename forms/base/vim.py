@@ -299,7 +299,7 @@ class SymbolRule(MappingRule):
     	"quest":       Key('?'),
 		"hash":        Key("#"),
 		"pipe":        Key("|"),
-		"squiggle":        Key("~"),
+		"squiggle":    Key("~"),
 
 		"(minus|dash)":   Key("minus"),
 		"plus":           Key("plus"),

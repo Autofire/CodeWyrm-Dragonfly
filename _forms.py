@@ -1,7 +1,7 @@
 from sys import stdout
 from dragonfly import (Grammar, CompoundRule, AppContext, FuncContext,
                        MappingRule, Function, PlaySound)
-from forms.sounds import play_sound
+from forms.base.sounds import play_sound
 
 # TODO Maybe remove this?
 import logging
@@ -14,8 +14,9 @@ logging.basicConfig()
 ========================================================================
 """
 try:
-	import forms.vim
+	from forms.base import vim
 
+	import forms.default
 	import forms.bash
 	import forms.rust
 	import forms.cpp
@@ -40,11 +41,11 @@ grammars = []
 
 # Generate our form tags
 # We could use strings but that's gross
-L_NONE, L_BASH, L_CPP, L_CS, L_JAVA, L_PYTHON, L_RUST, L_UNITY, L_UNREAL = range(9)
+L_DEFAULT, L_BASH, L_CPP, L_CS, L_JAVA, L_PYTHON, L_RUST, L_UNITY, L_UNREAL = range(9)
 
 # First is print, second is spoken. If just one, they are same.
 form_names = {
-	L_NONE: ["None", "!None"],
+	L_DEFAULT: ["Default"],
 	L_BASH: ["Bash"],
 	L_CPP: ["C++", "C plus plus"],
 	L_CS: ["C#", "C sharp"],
@@ -54,7 +55,7 @@ form_names = {
 	L_UNITY: ["Unity"],
 	L_UNREAL: ["Unreal"],
 }
-_active_form = L_NONE
+_active_form = L_DEFAULT
 
 def form_written(form):
 	return form_names[form][0]
@@ -79,9 +80,9 @@ def active_form(value=None):
 	if value is not None:
 		if value == _active_form:
 			print("Already in " + form_written(_active_form))
-		elif value == L_NONE:
+		elif value == L_DEFAULT:
 			print("Reverting " + form_written(_active_form))
-			_active_form = L_NONE
+			_active_form = L_DEFAULT
 			play_sound("revert")
 		else:
 			print("Switching from " + form_written(_active_form) + " to " + form_written(value))
@@ -90,29 +91,15 @@ def active_form(value=None):
 				
 	return _active_form
 
-_bash_vim = True
-def bash_vim(value=None):
-	global _bash_vim
-
-	if value is not None:
-		if value != _bash_vim:
-			if value:
-				play_sound("shift")
-			else:
-				play_sound("revert")
-		_bash_vim = value
-		print("Overriding Bash with VIM: ", value)
-
-	return _bash_vim
-
 def load_forms(unload=False):
 	global grammars
 
 	try:
 		if unload:
 			print("Reloading forms...")
-			reload(forms.vim)
+			reload(vim)
 
+			reload(forms.default)
 			reload(forms.bash)
 			reload(forms.rust  )
 			reload(forms.cpp   )
@@ -149,15 +136,6 @@ def build_grammars():
 	intellij_context = AppContext(executable="idea64")
 	vs_context = AppContext(executable="devenv")
 
-	"""
-	bash_base_context = putty_context | extraterm_context;
-	vim_bash_override_context = FuncContext(bash_vim) | AppContext(title="VIM")
-	bash_context = (bash_base_context & ~vim_bash_override_context)
-	bash_vim_context = (bash_base_context & vim_bash_override_context)
-
-	vim_context = bash_vim_context | netbeans_context | intellij_context | vs_context
-	"""
-
 	bash_context = putty_context | extraterm_context;
 
 	vim_context = bash_context | netbeans_context | intellij_context | vs_context
@@ -167,8 +145,9 @@ def build_grammars():
 				  | intellij_context)
 
 	new_grammars = [
-		forms.vim.build_grammar(vim_context),
+		vim.build_grammar(vim_context),
 
+		forms.default  .build_grammar(vim_context & build_form_context(L_DEFAULT)),
 		forms.bash  .build_grammar(vim_context & build_form_context(L_BASH)),
 		forms.rust  .build_grammar(vim_context & build_form_context(L_RUST)),
 		forms.cpp   .build_grammar(vim_context & build_form_context(L_CPP)),
@@ -224,9 +203,9 @@ control_rule = MappingRule(
 form_rule_mapping = {}
 for form in form_names.keys(): 
 	form_rule_mapping["dragon shift " + form_spoken(form)] = Function(active_form, value=form)
-form_rule_mapping["dragon shift Bash"] += Function(forms.vim.set_mode_immediate, silent=True)
+form_rule_mapping["dragon shift Bash"] += Function(vim.set_mode_immediate, silent=True)
 
-form_rule_mapping["dragon revert"] = Function(active_form, value=L_NONE)
+form_rule_mapping["dragon revert"] = Function(active_form, value=L_DEFAULT)
 
 form_rule = MappingRule(
 	name = "forms",

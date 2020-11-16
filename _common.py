@@ -12,6 +12,7 @@ general_rule = MappingRule(
 		#"right": Key("right"),
 
 		#"say <text>": Text("%(text)s"),
+
 		},
 	extras = [
 		Dictation("text"),
@@ -27,7 +28,7 @@ common_name_rule = MappingRule(
 		],
 )
 
-grammar.add_rule(general_rule)
+#grammar.add_rule(general_rule)
 grammar.add_rule(common_name_rule)
 grammar.load()
 
