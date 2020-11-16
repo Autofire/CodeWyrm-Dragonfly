@@ -6,11 +6,10 @@ grammar = Grammar("common")
 general_rule = MappingRule(
 	name = "general",
 	mapping = {
-		"kay": Key("enter"),
-		"slap": Key("enter"),
-		"left": Key("left"),
-		"right": Key("right"),
-
+		#"kay": Key("enter"),
+		#"slap": Key("enter"),
+		#"left": Key("left"),
+		#"right": Key("right"),
 
 		#"say <text>": Text("%(text)s"),
 		},

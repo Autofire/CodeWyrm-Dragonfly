@@ -8,15 +8,26 @@ print("Loading grammar: bash")
 kw_rules = {}
 
 keywords = [
-"git",
+"git ",
+"vim ",
 ]
 for keyword in keywords:
 	kw_rules[keyword] = do_insert(keyword)
 
 complex_words = {
-"list": "ls",
-"remove": "rm",
-"move": "mv",
+"list": "ls ",
+"remove": "rm ",
+"move": "mv ",
+"cd": "cd ",
+"copy": "cp ",
+
+"as batch": "sbatch ",
+
+"secure copy": "scp ",
+"secure shell": "ssh ",
+
+"Cal poly": "cpp",
+"compute cluster": "hpc",
 }
 for word in complex_words:
 	kw_rules[word] = do_insert(complex_words[word])

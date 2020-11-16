@@ -213,6 +213,7 @@ insert_rule = MappingRule(
 		"mode insert":  Key("i") + Function(set_mode_immediate),
 		"mode append":  Key("a") + Function(set_mode_immediate),
 		"mode replace": Key("R") + Function(set_mode_immediate),
+		"mode search":  Key("slash") + Function(set_mode_immediate),
 
 		"default insert": Function(set_default_mode, new_mode=INSERT_MODE),
 		"default append": Function(set_default_mode, new_mode=APPEND_MODE),
@@ -298,6 +299,7 @@ class SymbolRule(MappingRule):
     	"quest":       Key('?'),
 		"hash":        Key("#"),
 		"pipe":        Key("|"),
+		"squiggle":        Key("~"),
 
 		"(minus|dash)":   Key("minus"),
 		"plus":           Key("plus"),
