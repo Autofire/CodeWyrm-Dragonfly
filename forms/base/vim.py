@@ -40,7 +40,7 @@ general_rule = MappingRule(
 		"file last": Text(":last\n"),
 
 		"all (file|files) write": Text(":wa\n"),
-		"file write": Text(":w\n"),
+		"file write": Text(":w\n") + make_sound_action("write"),
 		"file force write": Text(":w!"),
 
 		"file quit":  Text(":q\n"),
@@ -62,8 +62,8 @@ general_rule = MappingRule(
 window_rule = MappingRule(
 	name = "window",
 	mapping = {
-		"window split vertical": Key("c-w") + Key("s"),
-		"window split horizontal": Key("c-w") + Key("v"),
+		"window split horizontal": Key("c-w") + Key("s"),
+		"window split vertical": Key("c-w") + Key("v"),
 
 		"window up": Key("c-w") + Key("up"),
 		"window down": Key("c-w") + Key("down"),
@@ -283,126 +283,7 @@ insert_rule = MappingRule(
 = Spell rule
 ========================================================================
 """
-"""
-# Credit for most of this logic goes to Christo Butcher and David Gessner
-# TODO Get URL
-class SymbolRule(MappingRule):
-    name = "symbol"
-    exported = False
-    mapping = {
-		"colon":       Key("colon"),
-		"semi[colon]": Key("semicolon"),
-    	"(com|comma)": Key('comma'),
-    	"equals":      Key('='),
-    	"bang":        Key('!'),
-    	"dot":         Key('.'),
-    	"amp":         Key('&'),
-    	"quest":       Key('?'),
-		"hash":        Key("#"),
-		"pipe":        Key("|"),
-		"squiggle":    Key("~"),
-
-		"(minus|dash)":   Key("minus"),
-		"plus":           Key("plus"),
-		"(slash|divide)": Key("slash"),
-		"(star|times)":   Key("star"),
-		"(mod|percent)":  Key("percent"),
-
-		"space":     Key("space"),
-		"backslash": Key("backslash"),
-		"tab":       Key("tab"),
-		"score":     Key("underscore"),
-
-		"len":       Key("("),
-		"ren":       Key(")"),
-		"lace":      Key("{"),
-		"race":      Key("}"),
-		"lack":      Key("["),
-		"rack":      Key("]"),
-        "langle":    Key('langle'),
-        "rangle":    Key('rangle'),
-
-        "single":    Key('squote'),
-        "double":    Key('dquote'),
-
-		"slap":      Key('enter'),
-	}
-
-letter_names = [
-	'apple', 'beetle', 'club', 'diamond', 'egg', 'flame',
-	'giga', 'heart', 'index', 'jack', 'king', 'limbo',
-	'mule', 'net', 'oak', 'page', 'queen', 'raft',
-	'spade', 'tide', 'use', 'vast', 'whale', 'x-ray',
-	'yacht', 'zed'
-]
-print(letter_names)
-
-letter_map = {
-	'zero':  Key('0'),
-	'one':   Key('1'),
-	'two':   Key('2'),
-	'three': Key('3'),
-	'four':  Key('4'),
-	'five':  Key('5'),
-	'six':   Key('6'),
-	'seven': Key('7'),
-	'eight': Key('8'),
-	'nine':  Key('9'),
-}
-for name in letter_names:
-	letter_map[name] = Key(name[0], static=True)
-	letter_map["cap " + name] = Key(name[0].upper(), static=True)
-
-
-class LetterRule(MappingRule):
-    name = "letter"
-    exported = False
-    mapping = letter_map 
-
-symbol = RuleRef(rule=SymbolRule(), name='symbol')
-letter = RuleRef(rule=LetterRule(), name='letter')
-letter_sequence = Repetition(
-	Alternative([letter, symbol]),
-	min=1, max=32, name='letter_sequence'
-)
-
-def execute_symbol(symbol):
-    symbol.execute()
-
-def execute_letter(letter):
-    letter.execute()
-
-def execute_letter_sequence(letter_sequence):
-    for letter in letter_sequence:
-        letter.execute()
-
-spell_rule = MappingRule(
-	name = "letter mapping",
-	mapping = {
-		"press <letter_sequence>": Function(execute_letter_sequence),
-		"spell <letter_sequence>":
-			Function(start_insert)
-			  + Function(execute_letter_sequence)
-			  + Function(end_insert),
-
-		# TODO Figure out how to bundle this into the rule below via defaults
-		"<symbol>":
-			Function(start_insert)
-		      + Function(execute_symbol)
-			  + Function(end_insert),
-
-		"<symbol> <letter_sequence>":
-			Function(start_insert)
-		      + Function(execute_symbol)
-		      + Function(execute_letter_sequence)
-			  + Function(end_insert),
-	},
-	extras = [
-		letter_sequence,
-		symbol
-	],
-)
-"""
+# See fluid.py
 
 """
 ========================================================================
@@ -417,22 +298,26 @@ edit_rule = MappingRule(
 
 
 		"[<n>] (care|cares) delete": Text("%(n)s") + Text("dl"),
-		"[<n>] (care|cares) yank":   Text("%(n)s") + Text("yl"),
+		"[<n>] (care|cares) yank":   Text("%(n)s") + Text("yl")
+			+ make_sound_action("yank"),
 		"[<n>] (care|cares) change": Text("%(n)s") + Text("cl")
 			+ Function(set_mode_immediate),
 
 		"[<n>] (term|terms) delete": Text("%(n)s") + Text("dw"),
-		"[<n>] (term|terms) yank":   Text("%(n)s") + Text("yw"),
+		"[<n>] (term|terms) yank":   Text("%(n)s") + Text("yw")
+			+ make_sound_action("yank"),
 		"[<n>] (term|terms) change": Text("%(n)s") + Text("cw")
 			+ Function(set_mode_immediate),
 
 		"[<n>] (word|words) delete": Text("%(n)s") + Text("dW"),
-		"[<n>] (word|words) yank":   Text("%(n)s") + Text("yW"),
+		"[<n>] (word|words) yank":   Text("%(n)s") + Text("yW")
+			+ make_sound_action("yank"),
 		"[<n>] (word|words) change": Text("%(n)s") + Text("cW")
 			+ Function(set_mode_immediate),
 
 		"[<n>] (line|lines) delete": Text("%(n)s") + Text("dd"),
-		"[<n>] (line|lines) yank":   Text("%(n)s") + Text("yy"),
+		"[<n>] (line|lines) yank":   Text("%(n)s") + Text("yy")
+			+ make_sound_action("yank"),
 		"[<n>] (line|lines) change": Text("%(n)s") + Text("cc")
 			+ Function(set_mode_immediate),
 		"[<n>] (line|lines) join":   Text("%(n)s") + Key("s-j"),

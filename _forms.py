@@ -14,7 +14,7 @@ logging.basicConfig()
 ========================================================================
 """
 try:
-	from forms.base import (vim, fluid)
+	from forms.base import (vim, fluid, sounds)
 
 	import forms.default
 	import forms.bash
@@ -100,6 +100,7 @@ def load_forms(unload=False):
 	try:
 		if unload:
 			print("Reloading forms...")
+			reload(sounds)
 			reload(vim)
 			reload(fluid)
 
