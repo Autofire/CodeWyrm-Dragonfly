@@ -1,7 +1,8 @@
 from dragonfly import (Grammar,
-                       MappingRule, CompoundRule,
+                       MappingRule, CompoundRule, RuleRef,
                        Dictation, Key, Text, Function)
-from base.vim import wrapped_insert, insert, do_insert
+from base.vim import wrapped_insert, insert, Text
+from base import fluid
 
 print("Loading grammar: cs")
 
@@ -30,9 +31,9 @@ keywords = [
 "while",
 ]
 for keyword in keywords:
-	kw_rules[keyword] = do_insert(keyword)
-kw_rules["for each"] = do_insert("foreach")
-kw_rules["stack alloc"] = do_insert("stackalloc")
+	kw_rules[keyword] = Text(keyword)
+kw_rules["for each"] = Text("foreach")
+kw_rules["stack alloc"] = Text("stackalloc")
 
 type_prefix = "data "
 types = [
@@ -42,23 +43,23 @@ types = [
 	"void"
 ]
 for t in types:
-	kw_rules[type_prefix + t] = do_insert(t)
-kw_rules[type_prefix + "byte"] = do_insert("sbyte")
-kw_rules[type_prefix + "integer"] = do_insert("int")
-kw_rules[type_prefix + "(character|care)"] = do_insert("char")
+	kw_rules[type_prefix + t] = Text(t)
+kw_rules[type_prefix + "byte"] = Text("sbyte")
+kw_rules[type_prefix + "integer"] = Text("int")
+kw_rules[type_prefix + "(character|care)"] = Text("char")
 
 utype_prefix = "data you "
 utypes = [
 	"short", "int", "long"
 ]
 for t in utypes:
-	kw_rules[utype_prefix + t] = do_insert("u" + t)
-kw_rules[utype_prefix + "byte"] = do_insert("byte")
-kw_rules[utype_prefix + "integer"] = do_insert("uint")
+	kw_rules[utype_prefix + t] = Text("u" + t)
+kw_rules[utype_prefix + "byte"] = Text("byte")
+kw_rules[utype_prefix + "integer"] = Text("uint")
 
 keyword_rule = MappingRule( name = "java keywords", mapping = kw_rules )
 
 def build_grammar(context):
 	grammar = Grammar("cs", context=(context))
-	grammar.add_rule(keyword_rule)  
+	grammar.add_rule(fluid.build_rule(RuleRef(rule=keyword_rule)))
 	return grammar

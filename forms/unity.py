@@ -1,5 +1,5 @@
 from dragonfly import (Grammar,
-                       MappingRule, CompoundRule,
+                       MappingRule, CompoundRule, RuleRef,
                        Dictation, Key, Text, Function)
 from base.vim import wrapped_insert, insert 
 

@@ -1,7 +1,8 @@
 from dragonfly import (Grammar,
-                       MappingRule, CompoundRule,
+                       MappingRule, CompoundRule, RuleRef,
                        Dictation, Key, Text, Function)
 from base.vim import wrapped_insert, insert, do_insert
+from base import fluid
 
 print("Loading grammar: cpp")
 
@@ -53,7 +54,7 @@ keywords = [
 "while",
 ]
 for keyword in keywords:
-	kw_rules[keyword] = do_insert(keyword)
+	kw_rules[keyword] = Text(keyword)
 
 complex_words = {
 "static assert": "static_assert",
@@ -72,13 +73,13 @@ complex_words = {
 "end L": "endl",
 }
 for word in complex_words:
-	kw_rules[word] = do_insert(complex_words[word])
+	kw_rules[word] = Text(complex_words[word])
 
 variable_prefix = "var "
 variables = {
 }
 for word in variables:
-	kw_rules[variable_prefix + word] = do_insert(variables[word])
+	kw_rules[variable_prefix + word] = Text(variables[word])
 
 types = [
 	"byte", "short", "int", "long",
@@ -87,9 +88,9 @@ types = [
 	"void"
 ]
 for t in types:
-	kw_rules["data " + t] = do_insert(t)
-kw_rules["data integer"] = do_insert("int")
-kw_rules["data (character|care)"] = do_insert("char")
+	kw_rules["data " + t] = Text(t)
+kw_rules["data integer"] = Text("int")
+kw_rules["data (character|care)"] = Text("char")
 
 
 keyword_rule = MappingRule( name = "C++ keywords", mapping = kw_rules )
@@ -97,5 +98,6 @@ keyword_rule = MappingRule( name = "C++ keywords", mapping = kw_rules )
 
 def build_grammar(context):
 	grammar = Grammar("cpp", context=(context))
-	grammar.add_rule(keyword_rule)  
+	#grammar.add_rule(keyword_rule)  
+	grammar.add_rule(fluid.build_rule(RuleRef(rule=keyword_rule)))  
 	return grammar

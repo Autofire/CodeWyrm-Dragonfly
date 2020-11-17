@@ -1,7 +1,8 @@
 from dragonfly import (Grammar,
-                       MappingRule, CompoundRule,
+                       MappingRule, CompoundRule, RuleRef,
                        Dictation, Key, Text, Function)
-from base.vim import wrapped_insert, insert, do_insert
+from base.vim import wrapped_insert, insert, Text
+from base import fluid
 
 print("Loading grammar: java")
 
@@ -17,9 +18,9 @@ keywords = [
 	"throw", "throws", "volatile", "catch", "finally",
 ]
 for keyword in keywords:
-	kw_rules[keyword] = do_insert(keyword)
-kw_rules["instance of"] = do_insert("instanceof")
-kw_rules["GL"] = do_insert("gl")
+	kw_rules[keyword] = Text(keyword)
+kw_rules["instance of"] = Text("instanceof")
+kw_rules["GL"] = Text("gl")
 
 types = [
 	"byte", "short", "int", "long",
@@ -28,9 +29,9 @@ types = [
 	"void"
 ]
 for t in types:
-	kw_rules["data " + t] = do_insert(t)
-kw_rules["data integer"] = do_insert("int")
-kw_rules["data (character|care)"] = do_insert("char")
+	kw_rules["data " + t] = Text(t)
+kw_rules["data integer"] = Text("int")
+kw_rules["data (character|care)"] = Text("char")
 
 boxed_types = [
 	"Byte", "Short", "Integer", "Long",
@@ -38,9 +39,9 @@ boxed_types = [
 	"Boolean", "Character"
 ]
 for t in boxed_types:
-	kw_rules["boxed " + t] = do_insert(t)
-kw_rules["boxed care"] = do_insert("Character")
-kw_rules["boxed int"] = do_insert("Integer")
+	kw_rules["boxed " + t] = Text(t)
+kw_rules["boxed care"] = Text("Character")
+kw_rules["boxed int"] = Text("Integer")
 
 
 keyword_rule = MappingRule( name = "java keywords", mapping = kw_rules )
@@ -48,5 +49,6 @@ keyword_rule = MappingRule( name = "java keywords", mapping = kw_rules )
 
 def build_grammar(context):
 	grammar = Grammar("java", context=(context))
-	grammar.add_rule(keyword_rule)  
+	#grammar.add_rule(keyword_rule)  
+	grammar.add_rule(fluid.build_rule(RuleRef(rule=keyword_rule)))  
 	return grammar

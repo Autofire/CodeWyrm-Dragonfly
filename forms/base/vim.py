@@ -62,8 +62,8 @@ general_rule = MappingRule(
 window_rule = MappingRule(
 	name = "window",
 	mapping = {
-		"window row split": Key("c-w") + Key("s"),
-		"window column split": Key("c-w") + Key("v"),
+		"window split vertical": Key("c-w") + Key("s"),
+		"window split horizontal": Key("c-w") + Key("v"),
 
 		"window up": Key("c-w") + Key("up"),
 		"window down": Key("c-w") + Key("down"),
@@ -283,6 +283,7 @@ insert_rule = MappingRule(
 = Spell rule
 ========================================================================
 """
+"""
 # Credit for most of this logic goes to Christo Butcher and David Gessner
 # TODO Get URL
 class SymbolRule(MappingRule):
@@ -401,6 +402,7 @@ spell_rule = MappingRule(
 		symbol
 	],
 )
+"""
 
 """
 ========================================================================
@@ -476,58 +478,9 @@ def build_grammar(context):
 	grammar.add_rule(edit_rule)
 	grammar.add_rule(insert_rule)
 	grammar.add_rule(window_rule)
-	grammar.add_rule(spell_rule)
+	#grammar.add_rule(fluid.spell_rule)
+	#grammar.add_rule(spell_rule)
 
 	return grammar
 
 
-"""
-========================================================================
-= Bootstrap grammar
-========================================================================
-"""
-""" see https://stackoverflow.com/questions/58111733/modal-commands-with-dragonfly """
-
-"""
-class VimEnabler(CompoundRule):
-    spec = "dragon shift vim"
-
-    def _process_recognition(self, node, extras): 
-        vimBootstrap.disable()
-        grammar.enable()
-        print "VIM grammar enabled"
-
-class VimDisabler(CompoundRule):
-    spec = "dragon revert vim"
-
-    def _process_recognition(self, node, extras):
-        grammar.disable()
-        vimBootstrap.enable()
-        print "VIM grammar disabled"
-
-vimBootstrap = Grammar("vim bootstrap")                
-vimBootstrap.add_rule(VimEnabler())
-grammar.add_rule(VimDisabler())
-
-
-grammar.load()
-vimBootstrap.load()
-
-#grammar.disable()
-vimBootstrap.disable()
-"""
-
-#grammar.load()
-
-# Unload function which will be called by natlink at unload time.
-"""
-def unload():
-    global grammar
-    if grammar: grammar.unload()
-    grammar = None
-
-
-global vimBootstrap
-if vimBootstrap: vimBootstrap.unload()
-vimBootstrap = None
-"""
