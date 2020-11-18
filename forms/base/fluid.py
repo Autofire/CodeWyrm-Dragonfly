@@ -3,6 +3,7 @@ from dragonfly import (Grammar, AppContext,
                        Dictation, Integer, Repeat,
 					   IntegerRef, RuleRef, Impossible,
 					   Literal, Sequence, Repetition, Alternative,
+					   Sequence, Optional,
                        Key, Text, Function, ActionBase)
 from vim import (start_insert, end_insert)
 
@@ -49,7 +50,6 @@ class SymbolRule(MappingRule):
 
 		"slap":      Key('enter'),
 	}
-
 letter_names = [
 	'apple', 'beetle', 'club', 'diamond', 'egg', 'flame',
 	'giga', 'heart', 'index', 'jack', 'king', 'limbo',
@@ -81,52 +81,123 @@ class LetterRule(MappingRule):
     mapping = letter_map 
 
 
-def execute_symbol(symbol):
-	symbol.execute()
+def upper_first(text):
+	if(len(text) > 1):
+		return text[0].upper() + text[1:]
+	elif(len(text) == 1):
+		return text[0].upper()
+	else:
+		return text
+
+def lower_first(text):
+	if(len(text) > 1):
+		return text[0].lower() + text[1:]
+	elif(len(text) == 1):
+		return text[0].lower()
+	else:
+		return text
+
+fluid_insert_rule = MappingRule(
+	name = "fluid insert base",
+	mapping = {
+		"say <text>":           Text("%(text)s"),
+		"snake <snake_text>":   Text("%(snake_text)s") ,
+		"camel <camel_text>":   Text("%(camel_text)s") ,
+		"const <const_text>":   Text("%(const_text)s") ,
+		"pascal <pascal_text>": Text("%(pascal_text)s") ,
+		"lower <lower_text>":   Text("%(lower_text)s") ,
+		"upper <upper_text>":   Text("%(upper_text)s") ,
+		},
+	extras = [
+		Dictation("text"),
+		Dictation("snake_text").lower().replace(" ", "_"),
+		Dictation("const_text").upper().replace(" ", "_"),
+		Dictation("camel_text").camel().apply(lower_first),
+		Dictation("pascal_text").camel().apply(upper_first),
+		Dictation("const_text").upper().replace(" ", "_"),
+		Dictation("lower_text").lower(),
+		Dictation("upper_text").upper(),
+		],
+)
+insert = Optional(RuleRef(rule=fluid_insert_rule), name='insert')
+
+
+
+def execute(obj):
+	if not obj is None:
+		obj.execute()
 
 def execute_symbol_sequence(symbol_sequence):
-	for symbol in symbol_sequence:
-		symbol.execute()
+	if not symbol_sequence is None:
+		for symbol in symbol_sequence:
+			symbol.execute()
 
+def execute_lone_insert(insert_obj):
+	Function(start_insert).execute()
+	print insert_obj
+	execute(insert_obj)
+	Function(end_insert).execute()
+	print "end of function"
 
 def build_rule(custom_symbol=Impossible()):
 
-	symbol = Alternative([RuleRef(rule=SymbolRule()), custom_symbol], name='symbol')
+	symbol = Alternative(
+		[RuleRef(rule=SymbolRule()), custom_symbol],
+		name='symbol'
+	)
+
 	letter = RuleRef(rule=LetterRule(), name='letter')
 
-	symbol_sequence = Repetition(
+	symbol_sequence = Optional(Repetition(
 		Alternative([letter, symbol]),
-		min=1, max=32, name='symbol_sequence'
-	)
+		min=1, max=32
+	), name='symbol_sequence')
+	"""
+	symbol_sequence = Sequence([
+		Optional(Repetition(
+			Alternative([letter, symbol]),
+			min=1, max=32
+		)),
+		Optional(insert)
+	], name='symbol_sequence')
+	"""
 
 	spell_rule = MappingRule(
 		name = "letter mapping",
 		mapping = {
 			"press <symbol_sequence>": Function(execute_symbol_sequence),
-			"spell <symbol_sequence>":
+			"spell <symbol_sequence> <insert>":
 				Function(start_insert)
 				  + Function(execute_symbol_sequence)
+				  + Function(lambda insert: execute(insert))
 				  + Function(end_insert),
-
-			# TODO Figure out how to bundle this into the rule below via defaults
-			"<symbol>":
+	
+#		# TODO Figure out how to bundle this into the rule below via defaults
+#		#"<symbol>":
+#		#	Function(start_insert)
+#		#	  #+ Function(execute_symbol)
+#		#	  + Function(lambda symbol: symbol.execute())
+#		#	  + Function(end_insert),
+#
+			"<symbol> <symbol_sequence> <insert>":
 				Function(start_insert)
-				  #+ Function(execute_symbol)
-				  + Function(lambda symbol: symbol.execute())
-				  + Function(end_insert),
-
-			"<symbol> <symbol_sequence>":
-				Function(start_insert)
-				  + Function(execute_symbol)
+				  + Function(lambda symbol: execute(symbol))
 				  + Function(execute_symbol_sequence)
+				  + Function(lambda insert: execute(insert))
+				  + Function(end_insert),
+			"<insert>":
+				Function(start_insert)
+				  + Function(lambda insert: execute(insert))
 				  + Function(end_insert),
 		},
 		extras = [
 			symbol_sequence,
 			symbol,
+			insert,
 		],
 	)
 
 	return spell_rule
-
 	
+
+

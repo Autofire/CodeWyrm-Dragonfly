@@ -188,22 +188,6 @@ def issue_escape():
 	#mode = default_mode
 	set_mode(default_mode)
 
-def upper_first(text):
-	if(len(text) > 1):
-		return text[0].upper() + text[1:]
-	elif(len(text) == 1):
-		return text[0].upper()
-	else:
-		return text
-
-def lower_first(text):
-	if(len(text) > 1):
-		return text[0].lower() + text[1:]
-	elif(len(text) == 1):
-		return text[0].lower()
-	else:
-		return text
-
 insert_rule = MappingRule(
 	name = "insert",
 	mapping = {
@@ -220,33 +204,10 @@ insert_rule = MappingRule(
 
 		"dictate": Function(start_insert) + Function(set_mode_immediate) + Key("cs-npmul"),
 
-		"say <text>":           Function(start_insert)
-		                         + Text("%(text)s")
-								 + Function(end_insert),
-		"snake <snake_text>":   Function(start_insert)
-		                         + Text("%(snake_text)s")
-								 + Function(end_insert),
-		"camel <camel_text>":   Function(start_insert)
-		                         + Text("%(camel_text)s")
-								 + Function(end_insert),
-		"const <const_text>":   Function(start_insert)
-		                         + Text("%(const_text)s")
-								 + Function(end_insert),
-		"pascal <pascal_text>": Function(start_insert)
-		                         + Text("%(pascal_text)s")
-								 + Function(end_insert),
-		"lower <lower_text>": Function(start_insert)
-		                         + Text("%(lower_text)s")
-								 + Function(end_insert),
-		"upper <upper_text>": Function(start_insert)
-		                         + Text("%(upper_text)s")
-								 + Function(end_insert),
-		"num <posVal>":         Function(start_insert)
-		                         + Text("%(posVal)s")
-								 + Function(end_insert),
+		# See fluid.py for the insertt rules
 
 
-		"[<n>] enter": Key("enter") * Repeat(extra="n"),
+		# "[<n>] enter": Key("enter") * Repeat(extra="n"),
 
 		"singles": Function(wrapped_insert, start = "'", end = "'"),
 		"doubles": Function(wrapped_insert, start = '"', end = '"'),
@@ -260,14 +221,6 @@ insert_rule = MappingRule(
 		"[<n>] backs":  Key("backspace") * Repeat(extra="n"),
 		},
 	extras = [
-		Dictation("text"),
-		Dictation("snake_text").lower().replace(" ", "_"),
-		Dictation("const_text").upper().replace(" ", "_"),
-		Dictation("camel_text").camel().apply(lower_first),
-		Dictation("pascal_text").camel().apply(upper_first),
-		Dictation("const_text").upper().replace(" ", "_"),
-		Dictation("lower_text").lower(),
-		Dictation("upper_text").upper(),
 
 		Integer("n", 1, 20),
 		Integer("posVal", 0, 1000),
@@ -333,7 +286,7 @@ edit_rule = MappingRule(
 		"[<n>] case (swap|toggle)": Text("%(n)s") + Key("~"),
 		},
 	extras = [
-		Integer("n", 1, 20),
+		Integer("n", 1, 100),
 		Dictation("text"),
 		],
 	defaults = {

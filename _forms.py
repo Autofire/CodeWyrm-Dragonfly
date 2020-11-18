@@ -6,6 +6,7 @@ from forms.base.sounds import play_sound
 # TODO Maybe remove this?
 import logging
 logging.basicConfig()
+#logging.getLogger("engine").setLevel(logging.DEBUG)
 
 
 """
@@ -159,17 +160,11 @@ def build_grammars():
 		forms.cs    .build_grammar(vim_context & build_form_context(L_CS)),
 		#forms.java  .build_grammar(vim_context & build_form_context(L_JAVA)),
 		forms.java  .build_grammar(java_context),
-		#forms.python.build_grammar(vim_context & build_form_context(L_PYTHON)),
+		forms.python.build_grammar(vim_context & build_form_context(L_PYTHON)),
 
 		#forms.unity .build_grammar(vim_context & build_form_context(L_UNITY)),
 		#forms.unreal.build_grammar(vim_context & build_form_context(L_UNREAL)),
 	]
-	#new_grammars = {
-	#	'_bash': forms.bash.build_grammar(bash_context),
-	#	'_vim':  forms.vim.build_grammar(vim_context),
-	#
-	#	'rust': forms.rust.build_grammar(vim_context),
-	#}
 
 	return new_grammars
 
