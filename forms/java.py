@@ -6,9 +6,21 @@ from base import fluid
 
 print("Loading grammar: java")
 
+special_rule = MappingRule(
+	name = "rust special",
+	mapping = {
+		"print line": Function(wrapped_insert, start="System.out.println(", end = ");"),
+		},
+	extras = [
+
+		],
+)
+
+
 kw_rules = {}
 
 keywords = [
+	"true", "false",
 	"import", "package",
 	"class", "enum", "interface",
 	"const", "final", "static",
@@ -50,5 +62,6 @@ keyword_rule = MappingRule( name = "java keywords", mapping = kw_rules )
 def build_grammar(context):
 	grammar = Grammar("java", context=(context))
 	#grammar.add_rule(keyword_rule)  
+	grammar.add_rule(special_rule)
 	grammar.add_rule(fluid.build_rule(RuleRef(rule=keyword_rule)))  
 	return grammar

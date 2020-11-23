@@ -29,6 +29,8 @@ keywords = [
 "unchecked", "unsafe",
 "using", "virtual", "volatile",
 "while",
+
+"null",
 ]
 for keyword in keywords:
 	kw_rules[keyword] = Text(keyword)

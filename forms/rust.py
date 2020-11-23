@@ -25,7 +25,7 @@ simple_keywords = [
 "enum", "extern", "false",
 "for", "if", "impl",
 "in", "for", "let",
-"loop", "match", "mod",
+"loop", "match",
 "move", "mut", "pub",
 "impl", "ref", "return",
 "self", "static",
@@ -38,6 +38,7 @@ simple_keywords = [
 "pure", "unsized", "virtual",
 "yield",
 
+"self",
 "io",
 ]
 for keyword in simple_keywords:
@@ -51,6 +52,7 @@ complex_kw = {
 	"function": "fn",
 	"length": "len",
 	"cap self": "Self",
+	"module": "mod",
 
 	"vector": "Vec",
 
