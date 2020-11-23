@@ -243,48 +243,49 @@ insert_rule = MappingRule(
 = Edit rule
 ========================================================================
 """
+def merge_two_dicts(x, y):
+    z = x.copy()   # start with x's keys and values
+    z.update(y)    # modifies z with y's keys and values & returns None
+    return z
+
+edit_mapping = {
+	"[<n>] undo": Text("%(n)s") + Key("u"),
+	"[<n>] redo": Text("%(n)s") + Key("c-r"),
+
+	"[<n>] (line|lines) join":   Text("%(n)s") + Key("s-j"),
+
+	"[<n>] (line|lines) end delete": Text("%(n)s") + Key("s-d"),
+	"[<n>] (line|lines) end change": Text("%(n)s") + Key("s-c"),
+
+	"[<n>] paste (before|above)": Text("%(n)s") + Key("P"),
+	"[<n>] paste (after|below)":  Text("%(n)s") + Key("p"),
+	
+	"bracket match": Key("percent"),
+
+	"repeat": Key("."),
+
+	"[<n>] case (swap|toggle)": Text("%(n)s") + Key("~"),
+}
+
+edit_operands = {
+	"(care|cares)": "l",
+	"(term|terms)": "w",
+	"(word|words)": "W",
+	"(line|lines)": None
+}
+for operand in edit_operands:
+	edit_mapping.update({
+		"[<n>] " + operand + " delete": Text("%(n)sd" + (edit_operands[operand] or "d")),
+		"[<n>] " + operand + " yank":   Text("%(n)sy" + (edit_operands[operand] or "y"))
+			+ make_sound_action("yank"),
+		"[<n>] " + operand + " change": Text("%(n)sc" + (edit_operands[operand] or "c"))
+			+ Function(set_mode_immediate),
+	})
+	
+
 edit_rule = MappingRule(
 	name = "edit",
-	mapping = {
-		"[<n>] undo": Text("%(n)s") + Key("u"),
-		"[<n>] redo": Text("%(n)s") + Key("c-r"),
-
-
-		"[<n>] (care|cares) delete": Text("%(n)s") + Text("dl"),
-		"[<n>] (care|cares) yank":   Text("%(n)s") + Text("yl")
-			+ make_sound_action("yank"),
-		"[<n>] (care|cares) change": Text("%(n)s") + Text("cl")
-			+ Function(set_mode_immediate),
-
-		"[<n>] (term|terms) delete": Text("%(n)s") + Text("dw"),
-		"[<n>] (term|terms) yank":   Text("%(n)s") + Text("yw")
-			+ make_sound_action("yank"),
-		"[<n>] (term|terms) change": Text("%(n)s") + Text("cw")
-			+ Function(set_mode_immediate),
-
-		"[<n>] (word|words) delete": Text("%(n)s") + Text("dW"),
-		"[<n>] (word|words) yank":   Text("%(n)s") + Text("yW")
-			+ make_sound_action("yank"),
-		"[<n>] (word|words) change": Text("%(n)s") + Text("cW")
-			+ Function(set_mode_immediate),
-
-		"[<n>] (line|lines) delete": Text("%(n)s") + Text("dd"),
-		"[<n>] (line|lines) yank":   Text("%(n)s") + Text("yy")
-			+ make_sound_action("yank"),
-		"[<n>] (line|lines) change": Text("%(n)s") + Text("cc")
-			+ Function(set_mode_immediate),
-		"[<n>] (line|lines) join":   Text("%(n)s") + Key("s-j"),
-		"line end delete": Key("s-d"),
-
-		"[<n>] paste (before|above)": Text("%(n)s") + Key("P"),
-		"[<n>] paste (after|below)":  Text("%(n)s") + Key("p"),
-		
-		"bracket match": Key("percent"),
-
-		"repeat": Key("."),
-
-		"[<n>] case (swap|toggle)": Text("%(n)s") + Key("~"),
-		},
+	mapping = edit_mapping,
 	extras = [
 		Integer("n", 1, 100),
 		Dictation("text"),
