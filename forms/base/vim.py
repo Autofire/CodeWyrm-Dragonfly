@@ -194,10 +194,14 @@ insert_rule = MappingRule(
 		"escape": Function(issue_escape) + make_sound_action("mode cmd"),
 
 		"mode immediate": Function(set_mode_immediate),
-		"mode insert":  Key("i") + Function(set_mode_immediate),
-		"mode append":  Key("a") + Function(set_mode_immediate),
-		"mode replace": Key("R") + Function(set_mode_immediate),
-		"mode search":  Key("slash") + Function(set_mode_immediate),
+		"mode insert":    Key("i") + Function(set_mode_immediate),
+		"mode append":    Key("a") + Function(set_mode_immediate),
+		"mode replace":   Key("R") + Function(set_mode_immediate),
+		"mode search":    Key("slash") + Function(set_mode_immediate),
+
+		"mode visual":       Key("v")   + make_sound_action("mode vis"),
+		"mode visual line":  Key("V")   + make_sound_action("mode vis"),
+		"mode visual block": Key("c-v") + make_sound_action("mode vis"),
 
 		"default insert": Function(set_default_mode, new_mode=INSERT_MODE),
 		"default append": Function(set_default_mode, new_mode=APPEND_MODE),
@@ -258,7 +262,7 @@ edit_mapping = {
 	"[<n>] (line|lines) end change": Text("%(n)s") + Key("s-c"),
 
 	"[<n>] paste (before|above)": Text("%(n)s") + Key("P"),
-	"[<n>] paste (after|below)":  Text("%(n)s") + Key("p"),
+	"[<n>] paste (after|below)":  Text("%(n)s") + Key("p") + make_sound_action("paste"),
 	
 	"bracket match": Key("percent"),
 
@@ -271,11 +275,13 @@ edit_operands = {
 	"(care|cares)": "l",
 	"(term|terms)": "w",
 	"(word|words)": "W",
-	"(line|lines)": None
+	"(line|lines)": None,
+	"(block|selection)": " "
 }
 for operand in edit_operands:
 	edit_mapping.update({
-		"[<n>] " + operand + " delete": Text("%(n)sd" + (edit_operands[operand] or "d")),
+		"[<n>] " + operand + " delete": Text("%(n)sd" + (edit_operands[operand] or "d"))
+			+ make_sound_action("delete"),
 		"[<n>] " + operand + " yank":   Text("%(n)sy" + (edit_operands[operand] or "y"))
 			+ make_sound_action("yank"),
 		"[<n>] " + operand + " change": Text("%(n)sc" + (edit_operands[operand] or "c"))

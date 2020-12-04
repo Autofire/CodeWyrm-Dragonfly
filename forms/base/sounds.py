@@ -6,11 +6,17 @@ sounds = {
 	"refresh": sound_path + "refresh.wav",
 	"error": sound_path + "error.wav",
 	"shift": sound_path + "shift.wav",
+
 	"yank": sound_path + "yank.wav",
+	"paste": sound_path + "paste.wav",
+	"delete": sound_path + "delete.wav",
+
 	"write": sound_path + "write.wav",
 	"revert": sound_path + "revert.wav",
+
 	"mode imm": sound_path + "mode-imm.wav",
 	"mode cmd": sound_path + "mode-cmd.wav",
+	"mode vis": sound_path + "mode-vis.wav",
 }
 def play_sound(name):
 	PlaySound(file=sounds[name]).execute()
