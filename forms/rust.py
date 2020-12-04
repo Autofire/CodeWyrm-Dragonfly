@@ -65,6 +65,7 @@ complex_kw = {
 	"error": "Err",
 
 	"compare": "cmp",
+        "context": "ctx",
 }
 for key in complex_kw:
 	kw_rules[key] = Text(complex_kw[key])

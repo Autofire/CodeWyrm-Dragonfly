@@ -7,7 +7,7 @@ from base import fluid
 print("Loading grammar: java")
 
 special_rule = MappingRule(
-	name = "rust special",
+	name = "java special",
 	mapping = {
 		"print line": Function(wrapped_insert, start="System.out.println(", end = ");"),
 		},
@@ -28,17 +28,21 @@ keywords = [
 	"for", "while", "if", "else", "switch",
 	"this", "this", "new", "return",
 	"throw", "throws", "volatile", "catch", "finally",
+	"null", "true", "false",
 ]
 for keyword in keywords:
 	kw_rules[keyword] = Text(keyword)
 kw_rules["instance of"] = Text("instanceof")
 kw_rules["GL"] = Text("gl")
+kw_rules["none"] = Text("null")
 
 types = [
 	"byte", "short", "int", "long",
 	"float", "double",
 	"boolean", "char",
-	"void"
+	"void",
+
+	"Vector3f",
 ]
 for t in types:
 	kw_rules["data " + t] = Text(t)

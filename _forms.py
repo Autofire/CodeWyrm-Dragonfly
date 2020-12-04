@@ -161,6 +161,7 @@ def build_grammars():
 		#forms.java  .build_grammar(vim_context & build_form_context(L_JAVA)),
 		forms.java  .build_grammar(java_context),
 		forms.python.build_grammar(vim_context & build_form_context(L_PYTHON)),
+                forms.default.build_grammar(FuncContext(lambda: False)),
 
 		#forms.unity .build_grammar(vim_context & build_form_context(L_UNITY)),
 		#forms.unreal.build_grammar(vim_context & build_form_context(L_UNREAL)),

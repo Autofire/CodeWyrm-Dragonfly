@@ -15,12 +15,12 @@ class SymbolRule(MappingRule):
     mapping = {
 		"colon":       Key("colon"),
 		"semi[colon]": Key("semicolon"),
-    	"(com|comma)": Key('comma'),
-    	"equals":      Key('='),
-    	"bang":        Key('!'),
-    	"dot":         Key('.'),
-    	"amp":         Key('&'),
-    	"quest":       Key('?'),
+		"(com|comma)": Key('comma'),
+		"equals":      Key('='),
+		"bang":        Key('!'),
+		"dot":         Key('.'),
+		"amp":         Key('&'),
+		"quest":       Key('?'),
 		"hash":        Key("#"),
 		"pipe":        Key("|"),
 		"squiggle":    Key("~"),
@@ -42,11 +42,11 @@ class SymbolRule(MappingRule):
 		"race":      Key("}"),
 		"lack":      Key("["),
 		"rack":      Key("]"),
-        "langle":    Key('langle'),
-        "rangle":    Key('rangle'),
+		"langle":    Key('langle'),
+		"rangle":    Key('rangle'),
 
-        "single":    Key('squote'),
-        "double":    Key('dquote'),
+		"sing":    Key('squote'),
+		"dub":     Key('dquote'),
 
 		"slap":      Key('enter'),
 	}
@@ -127,17 +127,14 @@ def execute(obj):
 	if not obj is None:
 		obj.execute()
 
-def execute_symbol_sequence(symbol_sequence):
+def execute_symbol_sequence(symbol_sequence, spaced=False):
 	if not symbol_sequence is None:
 		for symbol in symbol_sequence:
 			symbol.execute()
-
-def execute_lone_insert(insert_obj):
-	Function(start_insert).execute()
-	print insert_obj
-	execute(insert_obj)
-	Function(end_insert).execute()
-	print "end of function"
+			if(spaced):
+				Key("space").execute()
+		if(spaced):
+			Key("backspace").execute()
 
 def build_rule(custom_symbol=Impossible()):
 
@@ -169,6 +166,11 @@ def build_rule(custom_symbol=Impossible()):
 			"spell <symbol_sequence> <insert>":
 				Function(start_insert)
 				  + Function(execute_symbol_sequence)
+				  + Function(lambda insert: execute(insert))
+				  + Function(end_insert),
+			"split <symbol_sequence> <insert>":
+				Function(start_insert)
+				  + Function(execute_symbol_sequence, spaced=True)
 				  + Function(lambda insert: execute(insert))
 				  + Function(end_insert),
 	
