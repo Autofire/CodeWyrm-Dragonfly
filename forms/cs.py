@@ -9,7 +9,7 @@ print("Loading grammar: cs")
 kw_rules = {}
 
 keywords = [
-"abstract", "as", "base",
+"abstract", "as",
 "break", "case", "catch",
 "checked", "class", "const",
 "continue", "decimal", "default", "delegate",
@@ -37,7 +37,16 @@ for keyword in keywords:
 kw_rules["for each"] = Text("foreach")
 kw_rules["stack alloc"] = Text("stackalloc")
 
-type_prefix = "data "
+complex_kw = {
+	"triple slash": "///",
+	"setter": "set {",
+	"getter": "get {",
+	"Noll": "null",
+}
+for key in complex_kw:
+	kw_rules[key] = Text(complex_kw[key])
+
+type_prefix = ""
 types = [
 	"short", "int", "long",
 	"float", "double",
@@ -59,7 +68,10 @@ for t in utypes:
 kw_rules[utype_prefix + "byte"] = Text("byte")
 kw_rules[utype_prefix + "integer"] = Text("uint")
 
-keyword_rule = MappingRule( name = "java keywords", mapping = kw_rules )
+keyword_rule = MappingRule( name = "cs keywords", mapping = kw_rules )
+
+def get_keyword_rules():
+	return kw_rules
 
 def build_grammar(context):
 	grammar = Grammar("cs", context=(context))

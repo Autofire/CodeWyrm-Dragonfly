@@ -6,6 +6,7 @@ from dragonfly import (Grammar, AppContext,
 					   Sequence, Optional,
                        Key, Text, Function, ActionBase)
 from vim import (start_insert, end_insert)
+from sounds import play_sound, make_sound_action
 
 # Credit for most of this logic goes to Christo Butcher and David Gessner
 # TODO Get URL
@@ -18,7 +19,7 @@ class SymbolRule(MappingRule):
 		"(com|comma)": Key('comma'),
 		"equals":      Key('='),
 		"bang":        Key('!'),
-		"dot":         Key('.'),
+		"(dot|point)": Key('.'),
 		"amp":         Key('&'),
 		"quest":       Key('?'),
 		"hash":        Key("#"),
@@ -133,8 +134,8 @@ def execute_symbol_sequence(symbol_sequence, spaced=False):
 			symbol.execute()
 			if(spaced):
 				Key("space").execute()
-		if(spaced):
-			Key("backspace").execute()
+		#if(spaced):
+		#	Key("backspace").execute()
 
 def build_rule(custom_symbol=Impossible()):
 
@@ -168,9 +169,17 @@ def build_rule(custom_symbol=Impossible()):
 				  + Function(execute_symbol_sequence)
 				  + Function(lambda insert: execute(insert))
 				  + Function(end_insert),
-			"split <symbol_sequence> <insert>":
+
+			"trailing <symbol_sequence> <insert>":
 				Function(start_insert)
 				  + Function(execute_symbol_sequence, spaced=True)
+				  + Function(lambda insert: execute(insert))
+				  + Function(end_insert),
+
+			"separate <symbol_sequence> <insert>":
+				Function(start_insert)
+				  + Function(execute_symbol_sequence, spaced=True)
+				  + Key("backspace").execute()
 				  + Function(lambda insert: execute(insert))
 				  + Function(end_insert),
 	

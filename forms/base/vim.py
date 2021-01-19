@@ -18,6 +18,7 @@ swallow_rule = MappingRule(
 	mapping = {
 		"<text>": Text(""),
 		"go to sleep": Key("npdiv"),
+		"dragon (go|return)": Key("cs-home"),
 		},
 	extras = [
 		Dictation("text"),
@@ -40,8 +41,8 @@ general_rule = MappingRule(
 		"file last": Text(":last\n"),
 
 		"all (file|files) write": Text(":wa\n"),
-		"file write": Text(":w\n") + make_sound_action("write"),
-		"file force write": Text(":w!"),
+		"file (write|save)": Text(":w\n") + make_sound_action("write"),
+		"file force (write|save)": Text(":w!"),
 
 		"file quit":  Text(":q\n"),
 		"file force quit":  Text(":q!"),
@@ -102,8 +103,9 @@ navi_rule = MappingRule(
 		"[<n>] (tail|tails) left":  Text("%(n)s") + Text("gE"),
 
 		"line top":    Text("gg"),
-		"line <abs>":  Text("%(abs)s") + Text("gg"),
 		"line bottom": Text("G"),
+
+		"<abs> absolute":  Text("%(abs)s") + Text("gg"),
 
 		"line end":   Key("dollar"),
 		"line start": Key("caret"),
@@ -258,10 +260,12 @@ edit_mapping = {
 
 	"[<n>] (line|lines) join":   Text("%(n)s") + Key("s-j"),
 
-	"[<n>] (line|lines) end delete": Text("%(n)s") + Key("s-d"),
-	"[<n>] (line|lines) end change": Text("%(n)s") + Key("s-c"),
+	"[<n>] (line|lines) end delete": Text("%(n)s") + Key("s-d")
+			+ make_sound_action("delete"),
+	"[<n>] (line|lines) end change": Text("%(n)s") + Key("s-c")
+			+ Function(set_mode_immediate),
 
-	"[<n>] paste (before|above)": Text("%(n)s") + Key("P"),
+	"[<n>] paste (before|above)": Text("%(n)s") + Key("P") + make_sound_action("paste"),
 	"[<n>] paste (after|below)":  Text("%(n)s") + Key("p") + make_sound_action("paste"),
 	
 	"bracket match": Key("percent"),

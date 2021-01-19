@@ -12,6 +12,8 @@ keywords = [
 "git ",
 "vim ",
 "cargo ",
+
+"Nijito",
 ]
 
 cargo_keywords = [

@@ -40,6 +40,7 @@ simple_keywords = [
 
 "self",
 "io",
+"new",
 ]
 for keyword in simple_keywords:
 	kw_rules[keyword] = Text(keyword)
@@ -65,7 +66,7 @@ complex_kw = {
 	"error": "Err",
 
 	"compare": "cmp",
-        "context": "ctx",
+	"context": "ctx",
 }
 for key in complex_kw:
 	kw_rules[key] = Text(complex_kw[key])
