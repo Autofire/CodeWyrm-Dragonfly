@@ -120,7 +120,7 @@ fluid_insert_rule = MappingRule(
 		Dictation("upper_text").upper(),
 		],
 )
-insert = Optional(RuleRef(rule=fluid_insert_rule), name='insert')
+fluid_insert = Optional(RuleRef(rule=fluid_insert_rule), name='fluid_insert')
 
 
 
@@ -156,7 +156,7 @@ def build_rule(custom_symbol=Impossible()):
 			Alternative([letter, symbol]),
 			min=1, max=32
 		)),
-		Optional(insert)
+		Optional(fluid_insert)
 	], name='symbol_sequence')
 	"""
 
@@ -164,23 +164,23 @@ def build_rule(custom_symbol=Impossible()):
 		name = "letter mapping",
 		mapping = {
 			"press <symbol_sequence>": Function(execute_symbol_sequence),
-			"spell <symbol_sequence> <insert>":
+			"spell <symbol_sequence> <fluid_insert>":
 				Function(start_insert)
 				  + Function(execute_symbol_sequence)
-				  + Function(lambda insert: execute(insert))
+				  + Function(lambda fluid_insert: execute(fluid_insert))
 				  + Function(end_insert),
 
-			"trailing <symbol_sequence> <insert>":
+			"trailing <symbol_sequence> <fluid_insert>":
 				Function(start_insert)
 				  + Function(execute_symbol_sequence, spaced=True)
-				  + Function(lambda insert: execute(insert))
+				  + Function(lambda fluid_insert: execute(fluid_insert))
 				  + Function(end_insert),
 
-			"separate <symbol_sequence> <insert>":
+			"separate <symbol_sequence> <fluid_insert>":
 				Function(start_insert)
 				  + Function(execute_symbol_sequence, spaced=True)
 				  + Key("backspace")
-				  + Function(lambda insert: execute(insert))
+				  + Function(lambda fluid_insert: execute(fluid_insert))
 				  + Function(end_insert),
 	
 #		# TODO Figure out how to bundle this into the rule below via defaults
@@ -190,21 +190,21 @@ def build_rule(custom_symbol=Impossible()):
 #		#	  + Function(lambda symbol: symbol.execute())
 #		#	  + Function(end_insert),
 #
-			"<symbol> <symbol_sequence> <insert>":
+			"<symbol> <symbol_sequence> <fluid_insert>":
 				Function(start_insert)
 				  + Function(lambda symbol: execute(symbol))
 				  + Function(execute_symbol_sequence)
-				  + Function(lambda insert: execute(insert))
+				  + Function(lambda fluid_insert: execute(fluid_insert))
 				  + Function(end_insert),
-			"<insert>":
+			"<fluid_insert>":
 				Function(start_insert)
-				  + Function(lambda insert: execute(insert))
+				  + Function(lambda fluid_insert: execute(fluid_insert))
 				  + Function(end_insert),
 		},
 		extras = [
 			symbol_sequence,
 			symbol,
-			insert,
+			fluid_insert,
 		],
 	)
 

@@ -134,24 +134,32 @@ navi_rule = MappingRule(
 ========================================================================
 """
 IMMEDIATE_MODE = -1
+COMMAND_MODE = 0
+
 APPEND_MODE = 0
 INSERT_MODE = 1
 
-default_mode = APPEND_MODE
-mode = default_mode
-def set_mode(new_mode):
+insert_action = Key("a")
+mode = COMMAND_MODE
+
+def set_mode(new_mode, silent=False):
 	global mode
 	mode = new_mode
+	if not silent:
+		if   new_mode == IMMEDIATE_MODE: play_sound("mode imm")
+		elif new_mode == COMMAND_MODE:   play_sound("mode cmd")
+
+def do_set_mode(mode, silent=False):
+	return Function(set_mode, new_mode=mode, silent=silent)
 
 def set_mode_immediate(silent=False):
-	set_mode(IMMEDIATE_MODE)
-	if not silent:
-		play_sound("mode imm")
+	set_mode(IMMEDIATE_MODE, silent)
+	#if not silent:
+	#	play_sound("mode imm")
 
-def set_default_mode(new_mode):
-	global default_mode
-	default_mode = new_mode
-	set_mode(new_mode)
+def set_insert_action(action):
+	global insert_action
+	insert_action = action
 
 def insert(action, space=False):
 	start_insert()
@@ -160,7 +168,7 @@ def insert(action, space=False):
 
 def wrapped_insert(start, end):
 	start_insert()
-	set_mode_immediate()
+	set_mode(IMMEDIATE_MODE)
 	Text(start + end).execute()
 	Key("left:" + str(len(end))).execute()
 
@@ -168,49 +176,39 @@ def do_insert(text):
 	return Function(insert, action=Text(text))
 
 def start_insert():
-	global mode
-	global default_mode
-
-	if   mode == APPEND_MODE: Key("a").execute()
-	elif mode == INSERT_MODE: Key("i").execute()
+	if mode == COMMAND_MODE:
+		insert_action.execute()
+	#if   mode == APPEND_MODE: Key("a").execute()
+	#elif mode == INSERT_MODE: Key("i").execute()
 
 def end_insert(space=False):
-	global mode
-
-	if(mode != IMMEDIATE_MODE): 
-		if(space): 
-			Key("space").execute()
-		issue_escape()
-
-def issue_escape():
-	#global mode
-	#global default_mode
-
-	Key("escape").execute()
-	#mode = default_mode
-	set_mode(default_mode)
+	if(space): 
+		Key("space").execute()
+	if(mode == COMMAND_MODE): 
+		Key("escape").execute()
 
 insert_rule = MappingRule(
 	name = "insert",
 	mapping = {
-		"escape": Function(issue_escape) + make_sound_action("mode cmd"),
+		"escape": Key("escape") + do_set_mode(COMMAND_MODE),
 
-		"mode immediate": Function(set_mode_immediate),
-		"mode insert":    Key("i") + Function(set_mode_immediate),
-		"mode append":    Key("a") + Function(set_mode_immediate),
-		"mode replace":   Key("R") + Function(set_mode_immediate),
-		"mode search":    Key("slash") + Function(set_mode_immediate),
+		"mode immediate": do_set_mode(IMMEDIATE_MODE),
+		"mode insert":    do_set_mode(IMMEDIATE_MODE) + Key("i")    , 
+		"mode append":    do_set_mode(IMMEDIATE_MODE) + Key("a")    , 
+		"mode replace":   do_set_mode(IMMEDIATE_MODE) + Key("R")    , 
+		"mode search":    do_set_mode(IMMEDIATE_MODE) + Key("slash"), 
 
+		# TODO Make there be actual mode for this
 		"mode visual":       Key("v")   + make_sound_action("mode vis"),
 		"mode visual line":  Key("V")   + make_sound_action("mode vis"),
 		"mode visual block": Key("c-v") + make_sound_action("mode vis"),
 
-		"default insert": Function(set_default_mode, new_mode=INSERT_MODE),
-		"default append": Function(set_default_mode, new_mode=APPEND_MODE),
+		"default insert": Function(set_insert_action, action=Key("i")),
+		"default append": Function(set_insert_action, action=Key("a")),
 
-		"dictate": Function(start_insert) + Function(set_mode_immediate) + Key("cs-npmul"),
+		"dictate": Function(start_insert) + do_set_mode(IMMEDIATE_MODE) + Key("cs-npmul"),
 
-		# See fluid.py for the insertt rules
+		# See fluid.py for the insert rules
 
 
 		# "[<n>] enter": Key("enter") * Repeat(extra="n"),
@@ -221,8 +219,8 @@ insert_rule = MappingRule(
 		
         "[<n>] (line|lines) break":  Function(insert, action=Key("enter"), space=False)
 		                              * Repeat(extra="n"),
-		"insert line below": Key("o")   + Function(set_mode_immediate),
-		"insert line above": Key("s-o") + Function(set_mode_immediate),
+		"insert line below": Key("o")   + do_set_mode(IMMEDIATE_MODE),
+		"insert line above": Key("s-o") + do_set_mode(IMMEDIATE_MODE),
 
 		"[<n>] backs":  Key("backspace") * Repeat(extra="n"),
 		},
@@ -263,7 +261,7 @@ edit_mapping = {
 	"[<n>] (line|lines) end delete": Text("%(n)s") + Key("s-d")
 			+ make_sound_action("delete"),
 	"[<n>] (line|lines) end change": Text("%(n)s") + Key("s-c")
-			+ Function(set_mode_immediate),
+			+ do_set_mode(IMMEDIATE_MODE),
 
 	"[<n>] paste (before|above)": Text("%(n)s") + Key("P") + make_sound_action("paste"),
 	"[<n>] paste (after|below)":  Text("%(n)s") + Key("p") + make_sound_action("paste"),
@@ -289,7 +287,7 @@ for operand in edit_operands:
 		"[<n>] " + operand + " yank":   Text("%(n)sy" + (edit_operands[operand] or "y"))
 			+ make_sound_action("yank"),
 		"[<n>] " + operand + " change": Text("%(n)sc" + (edit_operands[operand] or "c"))
-			+ Function(set_mode_immediate),
+			+ do_set_mode(IMMEDIATE_MODE),
 	})
 	
 
