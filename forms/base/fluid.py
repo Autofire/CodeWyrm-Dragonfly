@@ -179,7 +179,7 @@ def build_rule(custom_symbol=Impossible()):
 			"separate <symbol_sequence> <insert>":
 				Function(start_insert)
 				  + Function(execute_symbol_sequence, spaced=True)
-				  + Key("backspace").execute()
+				  + Key("backspace")
 				  + Function(lambda insert: execute(insert))
 				  + Function(end_insert),
 	

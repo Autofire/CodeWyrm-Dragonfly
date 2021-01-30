@@ -1,5 +1,5 @@
 from dragonfly import (Grammar, AppContext,
-                       MappingRule, CompoundRule,
+                       MappingRule, CompoundRule, FuncContext,
                        Dictation, Integer, Repeat,
 					   IntegerRef, RuleRef,
 					   Literal, Sequence, Repetition, Alternative,
@@ -48,12 +48,12 @@ general_rule = MappingRule(
 		"file force quit":  Text(":q!"),
 
 		"set line numbers": Text(":set nu! rnu!\n"),
-
 		},
 	extras = [
 		Dictation("text"),
 		],
 )
+
 
 """
 ========================================================================

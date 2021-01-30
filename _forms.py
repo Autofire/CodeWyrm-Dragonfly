@@ -141,10 +141,11 @@ def build_grammars():
 	netbeans_context = AppContext(executable="netbeans64")
 	intellij_context = AppContext(executable="idea64")
 	vs_context = AppContext(executable="devenv")
+	eclipse_context = AppContext(executable="eclipse")
 
 	bash_context = putty_context | extraterm_context;
 
-	vim_context = bash_context | netbeans_context | intellij_context | vs_context
+	vim_context = bash_context | netbeans_context | intellij_context | vs_context | eclipse_context
 
 	java_context = vim_context & (build_form_context(L_JAVA)
 	              | netbeans_context
